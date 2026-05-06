@@ -1,5 +1,6 @@
 import { Platform, StyleSheet, View, Text} from 'react-native';
 
+// The "Account" Tab
 export default function HomeScreen() {
     return (
         <View

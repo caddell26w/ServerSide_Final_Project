@@ -1,5 +1,7 @@
 import { Platform, StyleSheet, View, Text} from 'react-native';
 
+
+// The "Friends" Tab
 export default function HomeScreen() {
     return (
         <View

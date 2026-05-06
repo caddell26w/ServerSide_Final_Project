@@ -1,5 +1,8 @@
 import { Platform, StyleSheet, View, Text} from 'react-native';
 
+
+// The "Edit Workout" Tab
+
 export default function HomeScreen() {
     return (
         <View
