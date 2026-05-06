@@ -1,6 +1,15 @@
+import React, { useEffect, useState} from 'react';
 import { Platform, StyleSheet, View, Text} from 'react-native';
 
-export default function HomeScreen() {
+export default function startWorkout() {
+    const [data, setData] = useState(null)
+
+    useEffect(() => {
+        fetch('http://127.0.0.1:8429')
+        .then((response) => response.json())
+        .then((json) => setData(json.body))
+        .catch((error) => console.error('Connection Error:', error))
+    }, []);
     return (
         <View
         style={{
@@ -9,7 +18,7 @@ export default function HomeScreen() {
             justifyContent: 'center',
             alignItems: 'center',
         }}>
-        <Text>Text</Text>
+        <Text>{data}</Text>
         </View>
     )
 }
