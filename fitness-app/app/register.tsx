@@ -33,6 +33,7 @@ export default function LoginScreen() {
                     margin: 8,
                     borderWidth: 1
                 }}
+                value={username}
             />
             <TextInput
                 placeholder="Password"
@@ -45,6 +46,7 @@ export default function LoginScreen() {
                     margin: 8,
                     borderWidth: 1
                 }}
+                value={password}
             />
             <TextInput
                 placeholder="Confirm Password"
@@ -57,10 +59,17 @@ export default function LoginScreen() {
                     margin: 8,
                     borderWidth: 1,
                 }}
+                value={confirmedPassword}
             />
             <Button
                 title="Submit"
-                onPress={() => alert('Button pressed')}
+                onPress={() => {
+                    // Confirm user has matching passwords before moving on to complete registration
+                    if (password === confirmedPassword) {alert(`Register Potential Success`)} 
+                    else {alert(`Register Potential Failure`)}
+                }
+            }
+                //onPress={() => }
             />
         </View>
     )

@@ -57,7 +57,7 @@ export default function LoginScreen() {
             </Link>
             <Button
                 title="Submit"
-                onPress={() => alert('Button pressed')}
+                onPress={() => alert('Login button pressed')}
             />
         </View>
     )
