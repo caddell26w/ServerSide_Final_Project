@@ -5,10 +5,11 @@ import { Platform, StyleSheet, View, Text} from 'react-native';
 export default function startWorkout() {
     const [data, setData] = useState(null)
 
-    // Connect to app.py
+    // Connect to app.py, app.py uses port 8429
     useEffect(() => {
         fetch('http://127.0.0.1:8429')
         .then((response) => response.json())
+        // sets 'data' variable to whatever the fetch returned
         .then((json) => setData(json.body))
         .catch((error) => console.error('Connection Error:', error))
     }, []);
