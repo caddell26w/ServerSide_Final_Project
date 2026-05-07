@@ -4,6 +4,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+# Connected backend to the tsx
 @app.route("/", methods=['GET'])
 def index():
     print("HERE")

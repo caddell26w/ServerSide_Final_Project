@@ -5,6 +5,7 @@ import { Platform, StyleSheet, View, Text} from 'react-native';
 export default function startWorkout() {
     const [data, setData] = useState(null)
 
+    // Connect to app.py
     useEffect(() => {
         fetch('http://127.0.0.1:8429')
         .then((response) => response.json())
