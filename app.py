@@ -32,6 +32,6 @@ def login():
     reqData = req['data']
     username = reqData['username']
     password = reqData['password']
-    return("True")
+    return jsonify({"body": "true"})
 
 app.run(host='0.0.0.0', port=8429, debug=True)

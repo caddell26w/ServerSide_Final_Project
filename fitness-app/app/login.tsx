@@ -1,21 +1,23 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import React, {useState} from 'react';
 import {Platform, View, Text, TextInput, Button, Pressable} from 'react-native';
 import { useWindowDimensions } from 'react-native';
 
 export default function LoginScreen() {
+    const router = useRouter() // Allows navigation in one line
     const {width, height} = useWindowDimensions();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [visiblePasswordText, setVisiblePasswordText] = useState('');
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
-    const[isConfirmed, setConfirmed] = useState('');
+    const [isConfirmed, setConfirmed] = useState('');
 
     function login() {
         setConfirmed('')
 
+        // Use what user inputted and send to python for backend action
         let url = 'http://127.0.0.1:8429/login'
         let packet = {
             action: 'LOGIN',
@@ -32,7 +34,14 @@ export default function LoginScreen() {
             body: JSON.stringify(packet)
         }).then((response) => response.json())
         // sets 'data' variable to whatever the fetch returned
-        .then((json) => setConfirmed(json.body))
+        .then((json) => {
+
+            // Ensures we only check it AFTER we get the packet
+            if (json.body === "true") {
+                router.navigate('/home')
+            } else {
+            }
+        })
         .catch((error) => console.error('Connection Error:', error))
 
         setUsername('')
