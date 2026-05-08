@@ -20,6 +20,8 @@ const MAPPING = {
   'chart.bar.fill': 'insert-chart',
   'pencil':'mode-edit',
   'gearshape':'settings',
+  'lock':'lock-outline',
+  'lock.open':'lock-open',
 } as IconMapping;
 
 /**
