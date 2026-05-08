@@ -1,24 +1,30 @@
-import { Link } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import React, {useState} from 'react';
+import { Link } from 'expo-router';
+import React, {useState, useRef} from 'react';
 import {Platform, View, Text, TextInput, Button, Pressable} from 'react-native';
 import { useWindowDimensions } from 'react-native';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
     const {width, height} = useWindowDimensions();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [visiblePasswordText, setVisiblePasswordText] = useState('');
-    const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
+    const [confirmedPassword, setConfirmedPassword] = useState('');
 
-    function login() {
-        let url = 'http://127.0.0.1:8429/login'
+    const [visiblePasswordText, setVisiblePasswordText] = useState('');
+    const [visibleConfirmedPasswordText, setVisibleConfirmedPasswordText] = useState('');
+
+    const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
+    const [isConfirmedPasswordLockToggled, setIsConfirmedPasswordLockToggled] = useState(true);
+
+    function registerUser() {
+        let url = 'http://127.0.0.1:8429/register'
         let packet = {
-            action: 'LOGIN',
+            action: 'REGISTER',
             data: {
-                'username':`${username}`,
-                'password':`${password}`
+                'username' : `${username}`,
+                'password' : `${password}`,
+                'confirmedPassword' : `${confirmedPassword}`
             }
         }
         fetch(url, {
@@ -31,6 +37,8 @@ export default function LoginScreen() {
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
+        setConfirmedPassword('')
+        setVisibleConfirmedPasswordText('')
     }
 
     function hidePassword(passwordText:string) {
@@ -64,6 +72,37 @@ export default function LoginScreen() {
         setIsPasswordLockToggled(!isPasswordLockToggled)
     }
 
+    function hideConfirmedPassword(confirmedPasswordText:string) {
+        let hiddenString = ''
+        let confirmedPasswordLen = confirmedPasswordText.length
+        for (let char of confirmedPasswordText) {
+            hiddenString += '*'
+            if ((char != '*') && (confirmedPasswordLen > confirmedPassword.length)) {
+                setConfirmedPassword(confirmedPassword + char)
+            }
+        }
+        if ((confirmedPasswordLen) < confirmedPassword.length) {
+            setConfirmedPassword(confirmedPassword.substring(0, confirmedPasswordLen))
+            hiddenString = (hiddenString.substring(0, confirmedPasswordLen))
+        }
+        setVisibleConfirmedPasswordText(hiddenString)
+    }
+
+    function showConfirmedPassword(confirmedPasswordText:string) {
+        if (confirmedPasswordText.includes('*')) {
+            setVisibleConfirmedPasswordText(confirmedPassword)
+        }
+        else {
+            setVisibleConfirmedPasswordText(confirmedPasswordText)
+            setPassword(confirmedPasswordText)
+        }
+    }
+
+    function confirmedPasswordLockPressed() {
+        !isConfirmedPasswordLockToggled? hideConfirmedPassword(visibleConfirmedPasswordText) : showConfirmedPassword(visibleConfirmedPasswordText)
+        setIsConfirmedPasswordLockToggled(!isConfirmedPasswordLockToggled)
+    }
+
     return (
         <View
             style={{
@@ -78,11 +117,12 @@ export default function LoginScreen() {
                     fontWeight: 'bold',
                     fontSize: 20
                 }}>
-            Login
+            Register
             </Text>
             <TextInput
                 placeholder="Username"
                 placeholderTextColor={'black'}
+                value={username}
                 onChangeText={newText => setUsername(newText)}
                 style={{
                     height: 40,
@@ -101,14 +141,13 @@ export default function LoginScreen() {
                     placeholder="Password"
                     placeholderTextColor={'black'}
                     value={visiblePasswordText}
-                    onChangeText={newText => {isPasswordLockToggled? hidePassword(newText) : showPassword(newText)}}
+                    onChangeText={(newText) => {isPasswordLockToggled? hidePassword(newText) : showPassword(newText)}}
                     style={{
                         height: 40,
                         width: Platform.OS === 'web' ? 0.35 * width : 0.55 * width,
                         padding: 5,
-                        marginTop: 8,
-                        marginLeft: 36,
-                        marginHorizontal: 8,
+                        margin: 8,
+                        marginLeft: 36, //margin + size of icon
                         borderWidth: 1
                     }}
                 />
@@ -116,25 +155,47 @@ export default function LoginScreen() {
                     onPress={() => 
                         passwordLockPressed()
                     }>
-                    <IconSymbol size={28} name={isPasswordLockToggled? 'lock' : 'lock.open'} color={"#000000"}
-                    style={{
-                        marginTop: 8
-                    }}
-                    />
+                    <IconSymbol size={28} name={isPasswordLockToggled? 'lock' : 'lock.open'} color={"#000000"}/>
                 </Pressable>
             </View>
-            <Link href='/register' 
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center'
+                }}>
+                <TextInput
+                    placeholder="Confirm Password"
+                    placeholderTextColor={'black'}
+                    value={visibleConfirmedPasswordText}
+                    onChangeText={(newText) => {isConfirmedPasswordLockToggled? hideConfirmedPassword(newText) : showConfirmedPassword(newText)}}
+                    style={{
+                        height: 40,
+                        width: Platform.OS === 'web' ? 0.35 * width : 0.55 * width,
+                        padding: 5,
+                        margin: 8,
+                        marginLeft: 36,
+                        borderWidth: 1,
+                    }}
+                />
+                <Pressable
+                    onPress={() => 
+                        confirmedPasswordLockPressed()
+                    }>
+                    <IconSymbol size={28} name={isConfirmedPasswordLockToggled? 'lock' : 'lock.open'} color={'#000000'}/>
+                </Pressable>
+            </View>
+            <Link href='/login' 
                 style={{
                     marginVertical: 4, 
-                    marginLeft: 0.30 * width
+                    marginLeft: 0.2575 * width
                 }}>
                 <Text>
-                    Register Here!
+                    Already have an account?
                 </Text>
             </Link>
             <Button
                 title="Submit"
-                onPress={() => login()}
+                onPress={() => registerUser()}
             />
         </View>
     )
