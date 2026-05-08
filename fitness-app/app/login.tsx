@@ -11,8 +11,11 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [visiblePasswordText, setVisiblePasswordText] = useState('');
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
+    const[isConfirmed, setConfirmed] = useState('');
 
     function login() {
+        setConfirmed('')
+
         let url = 'http://127.0.0.1:8429/login'
         let packet = {
             action: 'LOGIN',
@@ -27,10 +30,22 @@ export default function LoginScreen() {
                 'Content-Type':'application/json',
             },
             body: JSON.stringify(packet)
-        })
+        }).then((response) => response.json())
+        // sets 'data' variable to whatever the fetch returned
+        .then((json) => setConfirmed(json.body))
+        .catch((error) => console.error('Connection Error:', error))
+
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
+
+        // Next Step: Navigate to main features if login successful
+        if (isConfirmed === "true") {
+
+        } else {
+
+        }
+
     }
 
     function hidePassword(passwordText:string) {

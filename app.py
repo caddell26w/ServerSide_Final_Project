@@ -10,6 +10,7 @@ def index():
     print("HERE")
     return jsonify({"body": "Hello"})
 
+# Grab user registration information for use
 @app.route("/register", methods=["POST"])
 def register():
     req = request.get_json()
@@ -17,16 +18,20 @@ def register():
     username = reqData['username']
     password = reqData['password']
     confirmedPassword = reqData['confirmedPassword']
-    print(username, password, confirmedPassword)
-    return("True")
 
+    # Passwords must be strings ensure we compare values
+    if str(password).strip() == str(confirmedPassword).strip():
+        return jsonify({"body": "true"})
+    else:
+        return jsonify({"body": "false"})
+
+# Grab user login information to confirm with database
 @app.route("/login", methods=['POST'])
 def login():
     req = request.get_json()
     reqData = req['data']
     username = reqData['username']
     password = reqData['password']
-    print(username, password)
     return("True")
 
 app.run(host='0.0.0.0', port=8429, debug=True)
