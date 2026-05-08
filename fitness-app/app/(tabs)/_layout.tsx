@@ -21,6 +21,7 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
+      // changed to home-- route goes to index which is already registration page, needed to remove duplicate
         name="home"
         options={{
           title: 'Home',

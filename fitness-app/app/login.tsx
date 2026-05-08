@@ -48,13 +48,6 @@ export default function LoginScreen() {
         setPassword('')
         setVisiblePasswordText('')
 
-        // Next Step: Navigate to main features if login successful
-        if (isConfirmed === "true") {
-
-        } else {
-
-        }
-
     }
 
     function hidePassword(passwordText:string) {
@@ -147,7 +140,7 @@ export default function LoginScreen() {
                     />
                 </Pressable>
             </View>
-            <Link href='/' 
+            <Link href='/home' 
                 style={{
                     marginVertical: 4, 
                     marginLeft: 0.30 * width
