@@ -1,12 +1,15 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import date
+import database
 import redis
 import uuid
 import json
 
 app = Flask(__name__)
+app.secret_key = 'supersecret'
 CORS(app)
+database.database_init()
 
 # R_Server = redis.StrictRedis()
 # try:
@@ -28,6 +31,13 @@ def register():
     password = reqData['password']
     confirmedPassword = reqData['confirmedPassword']
     print(username, password, confirmedPassword)
+
+    usernameAvailability = database.username_check(username)
+    print(usernameAvailability)
+    if usernameAvailability == True: #Username Available
+        # HERE
+        database.user_register(username, password)
+        # Create Token
     return("True")
 
 @app.route("/login", methods=['POST'])
@@ -38,29 +48,28 @@ def login():
     password = reqData['password']
     print(username, password)
 
-    # IF Verified
-    # session_id = str(uuid.uuid4())
-    # user_id = 1
-    # token = {"session_id": session_id, "user_id": user_id}
+    loginStatus = database.check_login(username, password)
+    if loginStatus == True: #Successful Login
+        print("SUCCESS")
+        # IF Verified
+        # session_id = str(uuid.uuid4())
+        # user_id = 1
+        # token = {"session_id": session_id, "user_id": user_id}
 
-    # R_Server.set(
-    #     f"session:{session_id}",
-    #     json.dumps(token)
-    # )
+        # R_Server.set(
+        #     f"session:{session_id}",
+        #     json.dumps(token)
+        # )
     return("True")
 
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
     req = request.get_json()
     reqData = req['data']
-    weeklyPlan = reqData['weeklyPlan']
-    sundayWorkout = weeklyPlan[0]
-    mondayWorkout = weeklyPlan[1]
-    tuesdayWorkout = weeklyPlan[2]
-    wednesdayWorkout = weeklyPlan[3]
-    thursdayWorkout = weeklyPlan[4]
-    fridayWorkout = weeklyPlan[5]
-    saturdayWorkout = weeklyPlan[6]
+    weeklyPlan = reqData['weeklyPlan'] 
+    # Verify User via Redis System
+    userid = 1 #****PLACE HOLDER****
+    database.update_workoutPlan(weeklyPlan[0], weeklyPlan[1], weeklyPlan[2], weeklyPlan[3], weeklyPlan[4], weeklyPlan[5], weeklyPlan[6], userid)
     return("True")
 
 @app.route("/getDailyWorkout", methods=['GET'])
@@ -68,16 +77,22 @@ def getDailyWorkout():
     currentDate = date.today()
     days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     day = days[currentDate.weekday()]
-    dayWorkout = 'Hello World'
+    # Verify User via Redis System
+    userid = 1 #****PLACE HOLDER****
+    dayWorkout = database.get_workoutPlan(userid).get(f'{day.lower()}Workout')
     return jsonify({'body' : {'day' : f'{day}', 'workout' : f'{dayWorkout}'}})
 
 @app.route("/accountSettings", methods=['GET', 'PUT'])
 def accountSettings():
     if request.method == 'GET':
-        user = 'apple'
-        profilePicture = 'default_profile.png'
-        goals = ["game", "sport"]
-        friendsList = ["place", "read"]
+        #Verify User via Redis System
+        userid = 1 #****PLACE HOLDER****
+        user = database.get_username(userid)
+        accountInfo = database.get_accountInfo(userid)
+        print(accountInfo)
+        profilePicture = accountInfo.get('profilePicture')
+        goals = (accountInfo or {}).get('goals')
+        friendsList = (accountInfo or {}).get('friendsList')
         return jsonify({'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
     elif request.method == 'PUT':
         return("True")

@@ -8,21 +8,22 @@ def database_init():
                         salt TEXT NOT NULL)'''
     table_accountInfo = '''CREATE TABLE IF NOT EXISTS accountInfo
                         (userid INT NOT NULL,
-                        profilePicture TEXT,
+                        profilePicture TEXT NOT NULL DEFAULT 'default_profile.png',
                         goals TEXT,
                         friendsList TEXT)'''
     table_workoutPlan = '''CREATE TABLE IF NOT EXISTS workoutPlan
                         (userid INT NOT NULL,
-                        sundayWorkout TEXT,
-                        mondayWorkout TEXT,
-                        tuesdayWorkout TEXT,
-                        wednesdayWorkout TEXT,
-                        thursdayWorkout TEXT,
-                        fridayWorkout TEXT,
-                        saturdayWorkout TEXT)'''
+                        sundayWorkout TEXT DEFAULT 'sunWorkout',
+                        mondayWorkout TEXT DEFAULT 'monWorkout',
+                        tuesdayWorkout TEXT DEFAULT 'tueWorkout',
+                        wednesdayWorkout TEXT DEFAULT 'wedWorkout',
+                        thursdayWorkout TEXT DEFAULT 'thurWorkout',
+                        fridayWorkout TEXT DEFAULT 'friWorkout',
+                        saturdayWorkout TEXT DEFAULT 'satWorkout')'''
     __db.execute(table_accounts)
     __db.execute(table_accountInfo)
     __db.execute(table_workoutPlan)
+    __db.commit()
 
 def user_register( username: str, password: str):
     def generate_salt(length: int) -> str:
@@ -38,7 +39,7 @@ def user_register( username: str, password: str):
                       (username, password, salt) VALUES
                       (?, ?, ?)'''
     __db = sqlite3.connect("fitness-app.db")
-    __db.execute(table_insert(username, hashed_password, salt))
+    __db.execute(table_insert, (username, hashed_password, salt))
     __db.commit()
     table_query = '''SELECT rowid from accounts
                      WHERE username = ?'''
@@ -60,11 +61,12 @@ def username_check(username: str) -> bool:
                         WHERE username = ?'''
     __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
-    for row in cursor.execute(table_query, (username,)):
-        if len(row) > 0:
-            return False # Username Exists
-        else 
-            return True
+    cursor.execute(table_query, (username,))
+    row = cursor.fetchall()
+    if len(row) > 0:
+        return False # Username Exists
+    else:
+        return True
 
 def check_login(username: str, password: str) -> bool:
     table_query = '''SELECT * from accounts
@@ -104,7 +106,7 @@ def get_username(userid: int) -> str:
 def update_password(currentPassword: str, newPassword: str, userid: int) -> bool:
     table_query = '''SELECT * from accounts
                      WHERE rowid = ?'''
-    __db = sqlite3.connect("pset4.db")
+    __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
     for row in cursor.execute(table_query, (userid,)):
         salt = row[2]
@@ -156,7 +158,7 @@ def update_accountInfo_friendsList(friendsList: str, userid: int):
 def get_accountInfo(userid: int) -> dict:
     table_query = '''SELECT * from accountInfo
                      WHERE userid = ?'''
-    __db.sqlite3.connect("fitness-app.db")
+    __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
     for row in cursor.execute(table_query, (userid,)):
         accountInfo = {'userid': row[0], 'profilePicture': row[1], 'goals': row[2], 'friendsList': row[3]}
@@ -165,7 +167,7 @@ def get_accountInfo(userid: int) -> dict:
 def get_workoutPlan(userid: int) -> dict:
     table_query = '''SELECT * from workoutPlan
                      WHERE userid = ?'''
-    __db.sqlite3.connect("fitness-app.db")
+    __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
     for row in cursor.execute(table_query, (userid,)):
         workoutPlan = {'userid': row[0], 'sundayWorkout': row[1], 'mondayWorkout': row[2], 'tuesdayWorkout': row[3], 'wednesdayWorkout': row[4], 'thursdayWorkout': row[5], 'fridayWorkout': row[6], 'saturdayWorkout': row[7]}
