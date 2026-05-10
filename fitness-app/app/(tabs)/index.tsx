@@ -7,14 +7,6 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
-/*
-
-Changed this to home.tsx, since having duplicates proved 
-troublesome in the navigating
-
-*/
-
-// The "Home" Tab
 export default function HomeScreen() {
   return (
     <View

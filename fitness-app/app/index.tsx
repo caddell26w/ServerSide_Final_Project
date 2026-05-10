@@ -1,12 +1,14 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Link, Redirect, useRouter} from 'expo-router';
-import React, {useState, useEffect, useRef} from 'react';
+import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
+import React, {useState} from 'react';
 import {Platform, View, Text, TextInput, Button, Pressable} from 'react-native';
 import { useWindowDimensions } from 'react-native';
 
 export default function RegisterScreen() {
-    const router = useRouter() // Allows navigation in one line
     const {width, height} = useWindowDimensions();
+
+    const router = useRouter();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -18,12 +20,7 @@ export default function RegisterScreen() {
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
     const [isConfirmedPasswordLockToggled, setIsConfirmedPasswordLockToggled] = useState(true);
 
-    const[isConfirmed, setConfirmed] = useState('');
-
     function registerUser() {
-        setConfirmed('')
-
-        // Use what user inputted and send to python for backend action
         let url = 'http://127.0.0.1:8429/register'
         let packet = {
             action: 'REGISTER',
@@ -39,23 +36,13 @@ export default function RegisterScreen() {
                 'Content-Type':'application/json',
             },
             body: JSON.stringify(packet)
-        }).then((response) => response.json())
-        .then((json) => {
-
-            // Ensures we only check it AFTER we get the packet
-            if (json.body === "true") {
-                router.navigate('/home')
-            } else {
-            }
         })
-        .catch((error) => console.error('Connection Error:', error))
-
-
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
         setConfirmedPassword('')
         setVisibleConfirmedPasswordText('')
+        router.navigate('/(tabs)') // IF WORKS ROUTE
     }
 
     function hidePassword(passwordText:string) {
@@ -98,7 +85,6 @@ export default function RegisterScreen() {
                 setConfirmedPassword(confirmedPassword + char)
             }
         }
-        
         if ((confirmedPasswordLen) < confirmedPassword.length) {
             setConfirmedPassword(confirmedPassword.substring(0, confirmedPasswordLen))
             hiddenString = (hiddenString.substring(0, confirmedPasswordLen))
@@ -158,7 +144,6 @@ export default function RegisterScreen() {
                 <TextInput
                     placeholder="Password"
                     placeholderTextColor={'black'}
-                    // Keep storage of userPassword and ensure real time change
                     value={visiblePasswordText}
                     onChangeText={(newText) => {isPasswordLockToggled? hidePassword(newText) : showPassword(newText)}}
                     style={{
@@ -185,7 +170,6 @@ export default function RegisterScreen() {
                 <TextInput
                     placeholder="Confirm Password"
                     placeholderTextColor={'black'}
-                    // Keep storage of userPassword and ensure real time change
                     value={visibleConfirmedPasswordText}
                     onChangeText={(newText) => {isConfirmedPasswordLockToggled? hideConfirmedPassword(newText) : showConfirmedPassword(newText)}}
                     style={{
@@ -210,7 +194,7 @@ export default function RegisterScreen() {
                     marginLeft: 0.2575 * width
                 }}>
                 <Text>
-                    Already have an account? 
+                    Already have an account?
                 </Text>
             </Link>
             <Button
