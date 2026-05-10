@@ -2,10 +2,14 @@ import { Link } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import React, {useState} from 'react';
 import {Platform, View, Text, TextInput, Button, Pressable} from 'react-native';
+import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 
 export default function LoginScreen() {
     const {width, height} = useWindowDimensions();
+
+    const router = useRouter();
+    
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -31,6 +35,7 @@ export default function LoginScreen() {
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
+        router.navigate('/(tabs)') // IF USER LOGS IN
     }
 
     function hidePassword(passwordText:string) {
@@ -83,6 +88,7 @@ export default function LoginScreen() {
             <TextInput
                 placeholder="Username"
                 placeholderTextColor={'black'}
+                value={username}
                 onChangeText={newText => setUsername(newText)}
                 style={{
                     height: 40,
@@ -129,7 +135,7 @@ export default function LoginScreen() {
                     marginLeft: 0.30 * width
                 }}>
                 <Text>
-                    Register Here!
+                    Don't have an account?
                 </Text>
             </Link>
             <Button

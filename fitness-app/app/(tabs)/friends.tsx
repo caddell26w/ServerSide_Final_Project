@@ -9,7 +9,7 @@ export default function HomeScreen() {
             justifyContent: 'center',
             alignItems: 'center',
         }}>
-        <Text>Text</Text>
+        <Text>Friends</Text>
         </View>
     )
 }

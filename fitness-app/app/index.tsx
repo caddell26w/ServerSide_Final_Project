@@ -1,11 +1,14 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Link } from 'expo-router';
-import React, {useState, useRef} from 'react';
+import { useRouter } from 'expo-router';
+import React, {useState} from 'react';
 import {Platform, View, Text, TextInput, Button, Pressable} from 'react-native';
 import { useWindowDimensions } from 'react-native';
 
 export default function RegisterScreen() {
     const {width, height} = useWindowDimensions();
+
+    const router = useRouter();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -39,6 +42,7 @@ export default function RegisterScreen() {
         setVisiblePasswordText('')
         setConfirmedPassword('')
         setVisibleConfirmedPasswordText('')
+        router.navigate('/(tabs)') // IF WORKS ROUTE
     }
 
     function hidePassword(passwordText:string) {
