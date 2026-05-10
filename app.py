@@ -25,6 +25,10 @@ Output: a true or false that dictates whether we move on
 def check_session(userid) -> bool:
     pass
 
+"""
+Parameter: userid to save
+Output: the cookie we send to the browser
+"""
 def create_session(user_id) -> Response:
     session_id = str(uuid.uuid4())
     token = {"session_id": session_id, "user_id": user_id}
