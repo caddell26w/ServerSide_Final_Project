@@ -38,6 +38,7 @@ def register():
         # HERE
         database.user_register(username, password)
         # Create Token
+        print("\nREGISTER SUCCESSFUL\n")
     return("True")
 
 @app.route("/login", methods=['POST'])
