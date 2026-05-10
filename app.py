@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response, Response
 from flask_cors import CORS
 from datetime import date
 import database
@@ -11,12 +11,33 @@ app.secret_key = 'supersecret'
 CORS(app)
 database.database_init()
 
-# R_Server = redis.StrictRedis()
-# try:
-#     R_Server.ping()
-# except:
-#     print("REDIS: Not Running -- No Streams Available")
-#     R_Server = None
+R_Server = redis.StrictRedis()
+try:
+     R_Server.ping()
+except:
+     print("REDIS: Not Running -- No Streams Available")
+     R_Server = None
+
+"""
+Parameter: userid
+Output: a true or false that dictates whether we move on
+"""
+def check_session(userid) -> bool:
+    pass
+
+def create_session(user_id) -> Response:
+    session_id = str(uuid.uuid4())
+    token = {"session_id": session_id, "user_id": user_id}
+
+    R_Server.set(
+        f"session:{session_id}",
+        json.dumps(token),
+        ex=3600
+    )
+    resp = make_response()
+    resp.set_cookie("session_id",session_id)
+
+    return resp
 
 @app.route("/", methods=['GET'])
 def index():
@@ -36,10 +57,17 @@ def register():
     print(usernameAvailability)
     if usernameAvailability == True: #Username Available
         # HERE
-        database.user_register(username, password)
+        # database.user_register(username, password)
         # Create Token
+        user_id = 1 # PLACEHOLDER
+        resp = create_session(user_id)
+
+        resp.set_data("True")
+
         print("\nREGISTER SUCCESSFUL\n")
-    return("True")
+        return resp
+    else:
+        return("False")
 
 @app.route("/login", methods=['POST'])
 def login():
@@ -52,16 +80,16 @@ def login():
     loginStatus = database.check_login(username, password)
     if loginStatus == True: #Successful Login
         print("SUCCESS")
-        # IF Verified
-        # session_id = str(uuid.uuid4())
-        # user_id = 1
-        # token = {"session_id": session_id, "user_id": user_id}
+        # IF verified
+        user_id = 1 # PLACEHOLDER
+        resp = create_session(user_id)
 
-        # R_Server.set(
-        #     f"session:{session_id}",
-        #     json.dumps(token)
-        # )
-    return("True")
+        resp.set_data("True")
+
+        print("\nLOGIN SUCCESSFUL\n")
+        return resp
+    else:
+        return("False")
 
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():

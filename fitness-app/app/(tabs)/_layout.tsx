@@ -22,7 +22,7 @@ export default function TabLayout() {
       }}>
       <Tabs.Screen
       // changed to home-- route goes to index which is already registration page, needed to remove duplicate
-        name="home"
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
