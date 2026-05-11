@@ -16,7 +16,7 @@ export default function LoginScreen() {
     const [visiblePasswordText, setVisiblePasswordText] = useState('');
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
 
-    function login() {
+    async function login() {
         let url = 'http://127.0.0.1:8429/login'
         let packet = {
             action: 'LOGIN',
@@ -25,12 +25,13 @@ export default function LoginScreen() {
                 'password':`${password}`
             }
         }
-        fetch(url, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json',
             },
-            body: JSON.stringify(packet)
+            body: JSON.stringify(packet),
+            credentials: 'include',
         })
         setUsername('')
         setPassword('')

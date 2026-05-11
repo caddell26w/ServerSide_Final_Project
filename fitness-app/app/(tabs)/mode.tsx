@@ -1,9 +1,12 @@
 import { Platform, StyleSheet, View, Text, TextInput, Button, Pressable} from 'react-native';
 import { cloneElement, useState} from 'react';
+import { useNavigation } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 
 export default function changeWorkoutScreen() {
     const {width, height} = useWindowDimensions();
+
+    const navigation = useNavigation();
 
     const [isSundayWorkoutToggled, setIsSundayWorkoutToggled] = useState(false)
     const [isMondayWorkoutToggled, setIsMondayWorkoutToggled] = useState(false)
@@ -29,7 +32,7 @@ export default function changeWorkoutScreen() {
         width: Platform.OS === 'web' ? 0.125 * width : 0.35 * width
     }
 
-    function changeWorkout() {
+    async function changeWorkout() {
         let weeklyPlan = [sundayWorkout, mondayWorkout, tuesdayWorkout, wednesdayWorkout, thursdayWorkout, fridayWorkout, saturdayWorkout]
         let url = 'http://127.0.0.1:8429/changeWorkout'
         let packet = {
@@ -38,13 +41,18 @@ export default function changeWorkoutScreen() {
                 'weeklyPlan': weeklyPlan,
             }
         }
-        fetch(url, {
+        let response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json'
             },
-            body: JSON.stringify(packet)
-        })
+            body: JSON.stringify(packet),
+            credentials: 'include'
+        }).then((resp) => {return resp.json()})
+        if (response.status === 'ERROR') {
+            console.error("Error:", response.body)
+            navigation.getParent()?.navigate('index')
+        }
     }
 
     return (

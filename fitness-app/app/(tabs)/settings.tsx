@@ -1,9 +1,12 @@
 import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { useNavigation } from 'expo-router';
 
 export default function HomeScreen() {
     const {width, height} = useWindowDimensions();
+
+    const navigation = useNavigation();
 
     const [user, setUser] = useState('')
     const [profilePicture, setProfilePicture] = useState('')
@@ -45,10 +48,13 @@ export default function HomeScreen() {
     }
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8429/accountSettings')
+        fetch('http://127.0.0.1:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
-        .then((json) => setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList))
-        .catch((error) => console.error('Connection Error:', error))
+        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList)}})
+        .catch((error) => {
+            console.error('Error:', error)
+            navigation.getParent()?.navigate('index')
+        })
         
     }, [])
 

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, make_response, Response
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 from datetime import date
 import database
@@ -8,61 +8,25 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
-CORS(app)
+CORS(app, supports_credentials='true', origins=['http://localhost:8081'])
 database.database_init()
 
 R_Server = redis.StrictRedis()
 try:
-     R_Server.ping()
+    R_Server.ping()
 except:
-     print("REDIS: Not Running -- No Streams Available")
-     R_Server = None
-
-"""
-Parameter: userid
-Output: a true or false that dictates whether we move on
-"""
-## CHECK SESSION NEEDS TESTING
-def check_session() -> bool:
-    session_id = request.cookies.get("session_id") # returns session id stored in cookie
-    if session_id == None:
-        return False
-
-    token = R_Server.get(f"session:{session_id}") # returns json
-    if token == None:
-        return False
-    
-    user_id = (json.load(token))["user_id"] # returns user_id
-
-    return user_id
-    pass
-
-"""
-Parameter: userid to save
-Output: the cookie we send to the browser
-"""
-def create_session(user_id) -> Response:
-    session_id = str(uuid.uuid4())
-    token = {"session_id": session_id, "user_id": user_id}
-
-    R_Server.set(
-        f"session:{session_id}",
-        json.dumps(token),
-        ex=3600
-    )
-    resp = make_response()
-    resp.set_cookie("session_id",session_id, max_age=3600)
-    # ex and max_age = expires after an hour
-
-    return resp
+    print("REDIS: Not Running -- No Streams Available")
+    R_Server = None
 
 @app.route("/", methods=['GET'])
 def index():
     print("HERE")
     return jsonify({"body": "Hello"})
 
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["POST", 'OPTIONS'])
 def register():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
     req = request.get_json()
     reqData = req['data']
     username = reqData['username']
@@ -74,75 +38,101 @@ def register():
     print(usernameAvailability)
     if usernameAvailability == True: #Username Available
         # HERE
-        # database.user_register(username, password)
+        database.user_register(username, password)
         # Create Token
-        user_id = 1 # PLACEHOLDER
-        resp = create_session(user_id)
+        session_id = str(uuid.uuid4())
+        user_id = 1
+        token = {"session_id": session_id, "user_id": user_id}
 
-        resp.set_data("True")
+        R_Server.set(
+            f"session:{session_id}",
+            json.dumps(token)
+        )
 
-        print("\nREGISTER SUCCESSFUL\n")
-        return resp
-    else:
-        return("False")
+        res = make_response(jsonify({'message': 'Success'}))
+        res.set_cookie('session_id', session_id)
+        return(res)
+    return jsonify({'status' : 'SUCCESS', 'body': ''})
 
-@app.route("/login", methods=['POST'])
+@app.route("/login", methods=['POST', 'OPTIONS'])
 def login():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
     req = request.get_json()
     reqData = req['data']
     username = reqData['username']
     password = reqData['password']
-    print(username, password)
 
     loginStatus = database.check_login(username, password)
     if loginStatus == True: #Successful Login
-        print("SUCCESS")
-        # IF verified
-        user_id = 1 # PLACEHOLDER
-        resp = create_session(user_id)
+        # IF Verified
+        session_id = str(uuid.uuid4())
+        user_id = 1
+        token = {"session_id": session_id, "user_id": user_id}
 
-        resp.set_data("True")
+        R_Server.set(
+            f"session:{session_id}",
+            json.dumps(token)
+        )
 
-        print("\nLOGIN SUCCESSFUL\n")
-        return resp
-    else:
-        return("False")
+        res = make_response(jsonify({'message': 'Success'}))
+        res.set_cookie('session_id', session_id)
+        return(res)
 
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+
     req = request.get_json()
     reqData = req['data']
     weeklyPlan = reqData['weeklyPlan'] 
-    # Verify User via Redis System
-    userid = 1 #****PLACE HOLDER****
-    database.update_workoutPlan(weeklyPlan[0], weeklyPlan[1], weeklyPlan[2], weeklyPlan[3], weeklyPlan[4], weeklyPlan[5], weeklyPlan[6], userid)
-    return("True")
+    database.update_workoutPlan(weeklyPlan[0], weeklyPlan[1], weeklyPlan[2], weeklyPlan[3], weeklyPlan[4], weeklyPlan[5], weeklyPlan[6], user_id)
+    res = make_response(jsonify({'status' : 'SUCCESS', 'body': ''}))
+    return res
 
 @app.route("/getDailyWorkout", methods=['GET'])
 def getDailyWorkout():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+
     currentDate = date.today()
     days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     day = days[currentDate.weekday()]
-    # Verify User via Redis System
-    userid = 1 #****PLACE HOLDER****
-    dayWorkout = database.get_workoutPlan(userid).get(f'{day.lower()}Workout')
-    return jsonify({'body' : {'day' : f'{day}', 'workout' : f'{dayWorkout}'}})
+   
+    dayWorkout = database.get_workoutPlan(user_id).get(f'{day.lower()}Workout')
+    return jsonify({'status' : 'SUCCESS', 'body' : {'day' : f'{day}', 'workout' : f'{dayWorkout}'}})
 
 @app.route("/accountSettings", methods=['GET', 'PUT'])
 def accountSettings():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+
     if request.method == 'GET':
-        #Verify User via Redis System
-        userid = 1 #****PLACE HOLDER****
         user = database.get_username(userid)
         accountInfo = database.get_accountInfo(userid)
-        print(accountInfo)
         profilePicture = accountInfo.get('profilePicture')
         goals = (accountInfo or {}).get('goals')
         friendsList = (accountInfo or {}).get('friendsList')
-        return jsonify({'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
+        return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
     elif request.method == 'PUT':
-        return("True")
+        return jsonify({'status' : 'SUCCESS', 'body': ''})
 
-
+def getUserid(token:str):
+    if not token:
+        return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
+    stored_ids = R_Server.get(f"session:{token}")
+    if stored_ids is None:
+        return jsonify({'status' : 'ERROR', 'body' : 'Current User Not Found'})
+    
+    ids = json.loads(stored_ids)
+    user_id = ids['user_id']
+    return user_id
 
 app.run(host='0.0.0.0', port=8429, debug=True)
