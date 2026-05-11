@@ -39,7 +39,8 @@ def create_session(user_id) -> Response:
         ex=3600
     )
     resp = make_response()
-    resp.set_cookie("session_id",session_id)
+    resp.set_cookie("session_id",session_id, max_age=3600)
+    # ex and max_age = expires after an hour
 
     return resp
 
