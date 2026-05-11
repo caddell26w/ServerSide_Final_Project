@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigation } from 'expo-router';
 import { Platform, StyleSheet, View, Text, useWindowDimensions, Pressable} from 'react-native';
 
 export default function startWorkout() {
     const {width, height} = useWindowDimensions();
+
+    const navigation = useNavigation()
 
     const [day, setDay] = useState('')
     const [dailyWorkout, setDailyWorkout] = useState('')
@@ -18,10 +21,13 @@ export default function startWorkout() {
     }
     
     useEffect(() => {
-        fetch('http://127.0.0.1:8429/getDailyWorkout')
+        fetch('http://127.0.0.1:8429/getDailyWorkout', {credentials: 'include'})
         .then((response) => response.json())
-        .then((json) => setDataValues(json.body.day, json.body.workout))
-        .catch((error) => console.error('Connection Error:', error))
+        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.day, json.body.workout)}})
+        .catch((error) => {
+            console.error('Error:', error)
+            navigation.getParent()?.navigate('index')
+        })
     })
 
     return (

@@ -35,7 +35,8 @@ export default function RegisterScreen() {
             headers: {
                 'Content-Type':'application/json',
             },
-            body: JSON.stringify(packet)
+            body: JSON.stringify(packet),
+            credentials: 'include'
         })
         setUsername('')
         setPassword('')
