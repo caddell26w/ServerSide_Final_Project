@@ -102,7 +102,7 @@ def getDailyWorkout():
         return user_id
 
     currentDate = date.today()
-    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
     day = days[currentDate.weekday()]
    
     dayWorkout = database.get_workoutPlan(user_id).get(f'{day.lower()}Workout')
