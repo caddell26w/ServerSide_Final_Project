@@ -21,7 +21,7 @@ export default function startWorkout() {
     }
     
     useEffect(() => {
-        fetch('http://127.0.0.1:8429/getDailyWorkout', {credentials: 'include'})
+        fetch('http://localhost:8429/getDailyWorkout', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.day, json.body.workout)}})
         .catch((error) => {

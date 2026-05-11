@@ -50,7 +50,7 @@ def register():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id)
+        res.set_cookie('session_id', session_id, httponly=True,samesite='Lax')
         return(res)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
@@ -76,12 +76,13 @@ def login():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id)
+        res.set_cookie('session_id', session_id, httponly=True,samesite='Lax')
         return(res)
 
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
     token = request.cookies.get('session_id')
+    print(token)
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
@@ -115,8 +116,8 @@ def accountSettings():
         return user_id
 
     if request.method == 'GET':
-        user = database.get_username(userid)
-        accountInfo = database.get_accountInfo(userid)
+        user = database.get_username(user_id)
+        accountInfo = database.get_accountInfo(user_id)
         profilePicture = accountInfo.get('profilePicture')
         goals = (accountInfo or {}).get('goals')
         friendsList = (accountInfo or {}).get('friendsList')

@@ -17,7 +17,7 @@ export default function LoginScreen() {
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
 
     async function login() {
-        let url = 'http://127.0.0.1:8429/login'
+        let url = 'http://localhost:8429/login'
         let packet = {
             action: 'LOGIN',
             data: {
@@ -33,10 +33,16 @@ export default function LoginScreen() {
             body: JSON.stringify(packet),
             credentials: 'include',
         })
+
+        const data = await response.json()
+
+        if (response.ok) {
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
         router.navigate('/(tabs)') // IF USER LOGS IN
+        }
+        
     }
 
     function hidePassword(passwordText:string) {
