@@ -22,7 +22,19 @@ except:
 Parameter: userid
 Output: a true or false that dictates whether we move on
 """
-def check_session(userid) -> bool:
+## CHECK SESSION NEEDS TESTING
+def check_session() -> bool:
+    session_id = request.cookies.get("session_id") # returns session id stored in cookie
+    if session_id == None:
+        return False
+
+    token = R_Server.get(f"session:{session_id}") # returns json
+    if token == None:
+        return False
+    
+    user_id = (json.load(token))["user_id"] # returns user_id
+
+    return user_id
     pass
 
 """
