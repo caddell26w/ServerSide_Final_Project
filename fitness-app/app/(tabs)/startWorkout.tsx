@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { Platform, StyleSheet, View, Text, useWindowDimensions, Pressable} from 'react-native';
 
@@ -20,7 +21,7 @@ export default function startWorkout() {
         setDailyWorkout(workoutValue)
     }
     
-    useEffect(() => {
+    useFocusEffect(() => {
         fetch('http://localhost:8429/getDailyWorkout', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.day, json.body.workout)}})
