@@ -72,7 +72,7 @@ export default function HomeScreen() {
                 alignItems: 'center'
             }}>
                 <Image 
-                    source={{ uri : `http://127.0.0.1:8429/static/users/${profilePicture}`}}
+                    source={{ uri : `http://192.168.143.57:8429/static/users/${profilePicture}`}}
                     style={{
                         width: 75,
                         height: 75,
@@ -84,7 +84,9 @@ export default function HomeScreen() {
                         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                         margin: 8
                     }}
-                >{user}</Text>
+                >
+                    {/* {user} */} Username
+                </Text>
             </View>
             <View
             style={{
@@ -114,6 +116,7 @@ export default function HomeScreen() {
                                 <Text 
                                 key={index}
                                 style={{
+                                    fontSize: Platform.OS === 'web'? 14 : 7,
                                     borderBottomWidth: 1.5,
                                     borderStyle: 'dashed',
                                     padding: 3,

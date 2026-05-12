@@ -26,7 +26,7 @@ export default function changeWorkoutScreen() {
 
     const exerciseDetailsSizing = {
         width: Platform.OS === 'web'? 0.125 * width: 0.35 * width,
-        height: 0.125 * height,
+        height: Platform.OS === 'web'? 0.125 * height: 0.095 * height,
     }
     const titleSizing = {
         width: Platform.OS === 'web' ? 0.125 * width : 0.35 * width
