@@ -34,14 +34,10 @@ export default function LoginScreen() {
             credentials: 'include',
         })
 
-        const data = await response.json()
-
-        if (response.ok) {
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
         router.navigate('/(tabs)') // IF USER LOGS IN
-        }
         
     }
 
