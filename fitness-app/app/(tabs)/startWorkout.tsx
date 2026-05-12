@@ -11,6 +11,11 @@ export default function startWorkout() {
     const [day, setDay] = useState('')
     const [dailyWorkout, setDailyWorkout] = useState('')
 
+    const [isTimerActive, setIsTimerActive] = useState(false)
+
+    const [mins, setMins] = useState(0)
+    const [secs, setSecs] = useState(0)
+
     const exerciseDetailsSizing = {
         width: Platform.OS === 'web'? 0.25 * width: 0.70 * width,
         height: 0.25 * height,
@@ -20,6 +25,19 @@ export default function startWorkout() {
         setDay(dayValue)
         setDailyWorkout(workoutValue)
     }
+
+    useEffect(() => {
+        if (isTimerActive == true) {
+            let startTime = Date.now()
+            let timer = setInterval(() => {
+                let currentTime = Date.now()
+                let newMins = Math.floor((currentTime - startTime) / (1000 * 60))
+                let newSecs = Math.round(((currentTime - startTime) / 1000) % 60)
+                setMins(newMins)
+                setSecs(newSecs)
+            }, 1000)
+            return () => clearInterval(timer)
+        }}, [isTimerActive])
     
     useFocusEffect(() => {
         fetch('http://localhost:8429/getDailyWorkout', {credentials: 'include'})
@@ -62,7 +80,9 @@ export default function startWorkout() {
                         styles.changeButtons
                     }>Skip</Text>
                 </Pressable>
-                <Pressable>
+                <Pressable
+                onPress={() => setIsTimerActive(true)}
+                >
                     <Text
                     style={
                         styles.changeButtons
@@ -75,6 +95,30 @@ export default function startWorkout() {
                         {backgroundColor: 'red'}
                     ]}>Exit</Text>
                 </Pressable>
+            </View>
+            <View
+            style={{
+                flexDirection: 'column',
+                alignItems: 'center',
+                margin: 12
+            }}
+            >
+                <Text 
+                style={{
+                    display: isTimerActive? 'flex' : 'none',
+                    fontSize: Platform.OS === 'web'? 18 : 9
+                }}
+                >
+                    Timer:
+                </Text>
+                <Text
+                style={{
+                    display: isTimerActive? 'flex' : 'none',
+                    fontSize: Platform.OS === 'web'? 18 : 9
+                }}
+                >
+                    {mins}:{secs < 10? '0' + secs: secs}
+                </Text>
             </View>
         </View>
     )

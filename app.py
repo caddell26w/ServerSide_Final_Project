@@ -8,7 +8,7 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
-CORS(app, supports_credentials='true', origins=['http://localhost:8081'])
+CORS(app, supports_credentials='true', origins=['http://localhost:8081', 'https://localhost'])
 database.database_init()
 
 R_Server = redis.StrictRedis()
@@ -50,7 +50,7 @@ def register():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, httponly=True,samesite='Lax')
+        res.set_cookie('session_id', session_id, samesite='None', secure=True)
         return(res)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
@@ -76,7 +76,7 @@ def login():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, httponly=True,samesite='Lax')
+        res.set_cookie('session_id', session_id, samesite='None', secure=True)
         return(res)
 
 @app.route("/changeWorkout", methods=['POST'])
@@ -96,6 +96,7 @@ def changeWorkout():
 
 @app.route("/getDailyWorkout", methods=['GET'])
 def getDailyWorkout():
+    print(len(request.cookies))
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
@@ -133,7 +134,7 @@ def getUserid(token:str):
         return jsonify({'status' : 'ERROR', 'body' : 'Current User Not Found'})
     
     ids = json.loads(stored_ids)
-    user_id = ids['user_id']
+    user_id = ids["user_id"]
     return user_id
 
 app.run(host='0.0.0.0', port=8429, debug=True)

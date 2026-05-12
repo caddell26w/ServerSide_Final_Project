@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import React, {useState} from 'react';
-import {Platform, View, Text, TextInput, Button, Pressable} from 'react-native';
+import {Platform,  StyleSheet, View, Text, TextInput, Button, Pressable} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 
@@ -141,10 +141,49 @@ export default function LoginScreen() {
                     Don't have an account?
                 </Text>
             </Link>
-            <Button
-                title="Submit"
-                onPress={() => login()}
-            />
+            <Pressable
+                onPress={() => login()}>
+                <Text style={[styles.changeButtons, {backgroundColor: 'blue'}]}>Submit</Text>
+            </Pressable>
         </View>
     )
 }
+const styles = StyleSheet.create({
+    viewContainer: {
+        margin: 10
+    },
+    dayTitle: {
+        fontSize: Platform.OS === 'web'? 18 : 9,
+        padding: 8,
+        textAlign: 'center',
+        borderColor: 'black',
+        borderTopRightRadius: 8,
+        borderTopLeftRadius: 8,
+        borderWidth: 3,
+        borderBottomWidth: 0,
+        borderStyle: 'solid'
+    },
+    exerciseDetails: {
+        fontSize: Platform.OS === 'web'? 14 : 7,
+        borderColor: 'black',
+        borderBottomRightRadius: 8,
+        borderBottomLeftRadius: 8,
+        borderWidth: 3,
+        borderStyle: 'solid',
+        marginBottom: 8,
+        padding: 8,
+        textAlignVertical: 'top'
+    },
+    changeButtons: {
+        alignSelf: 'center',
+        padding: 8,
+        borderRadius: 8,
+        fontWeight: '500',
+        fontSize: Platform.OS === 'web'? 14 : 7,
+        backgroundColor: 'black',
+        color: 'white',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        textTransform: 'uppercase',
+        textAlign: 'center'
+    }
+})
