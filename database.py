@@ -25,6 +25,10 @@ def database_init():
     __db.execute(table_workoutPlan)
     __db.commit()
 
+"""
+Input: password and username
+Purpose: store user's info securely in the database
+"""
 def user_register( username: str, password: str):
     def generate_salt(length: int) -> str:
         characters = string.ascii_letters + string.digits + string.punctuation
@@ -56,6 +60,10 @@ def user_register( username: str, password: str):
     __db.execute(create_workoutPlan, (userid,))
     __db.commit()
 
+"""
+Input: the username the user entered into the register
+Purpose: Ensure unique username to prevent confusion
+"""
 def username_check(username: str) -> bool:
     table_query = '''SELECT * from accounts
                         WHERE username = ?'''
@@ -68,6 +76,10 @@ def username_check(username: str) -> bool:
     else:
         return True
 
+"""
+Input: what the user entered for login and password
+Purpose: Ensure the user had the correct login and password to prevent identity theft
+"""
 def check_login(username: str, password: str) -> bool:
     table_query = '''SELECT * from accounts
                      WHERE username = ?'''
@@ -85,6 +97,10 @@ def check_login(username: str, password: str) -> bool:
             return False
     return False
 
+"""
+Input: username
+Purpose: Get the id associated with the username
+"""
 def get_userid(username: str) -> int:
     table_query = '''SELECT rowid from accounts
                      WHERE username = ?'''
@@ -94,6 +110,10 @@ def get_userid(username: str) -> int:
         rowid = row[0]
         return rowid
 
+"""
+Input: userid
+Purpose: Get the username associated with the id
+"""
 def get_username(userid: int) -> str:
     table_query = '''SELECT username from accounts
                      WHERE rowid = ?'''
@@ -103,6 +123,11 @@ def get_username(userid: int) -> str:
         username = row[0]
         return username
 
+"""
+Input: passwords and userid
+Output: whether it worked or not
+Purpose: Ensure security by ensuring hashing/salting and verification
+"""
 def update_password(currentPassword: str, newPassword: str, userid: int) -> bool:
     table_query = '''SELECT * from accounts
                      WHERE rowid = ?'''
@@ -125,6 +150,10 @@ def update_password(currentPassword: str, newPassword: str, userid: int) -> bool
     __db.commit()
     return True
 
+"""
+Input: workout plan according to user input
+Purpose: Update database of the user's workout plan according to userid
+"""
 def update_workoutPlan(sundayWorkout: str, mondayWorkout: str, tuesdayWorkout: str, wednesdayWorkout: str, thursdayWorkout: str, fridayWorkout: str, saturdayWorkout: str, userid: int):
     update_workoutPlan = '''UPDATE workoutPlan
                             SET sundayWorkout = ?,

@@ -26,6 +26,7 @@ export default function startWorkout() {
         setDailyWorkout(workoutValue)
     }
 
+    // Start the timer
     useEffect(() => {
         if (isTimerActive == true) {
             let startTime = Date.now()

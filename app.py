@@ -103,6 +103,7 @@ def getDailyWorkout():
         return user_id
 
     currentDate = date.today()
+    # weekday() returns 0 as monday and so on, configured list to match this
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
     day = days[currentDate.weekday()]
    
@@ -116,6 +117,7 @@ def accountSettings():
     if type(user_id) != int:
         return user_id
 
+    # uses database to send client the info to be displayed
     if request.method == 'GET':
         user = database.get_username(user_id)
         accountInfo = database.get_accountInfo(user_id)
@@ -126,6 +128,11 @@ def accountSettings():
     elif request.method == 'PUT':
         return jsonify({'status' : 'SUCCESS', 'body': ''})
 
+"""
+Input: token from the cookie
+Output: user_id according to cookie
+Purpose: get the user_id for verification according to the page we're on
+"""
 def getUserid(token:str):
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})

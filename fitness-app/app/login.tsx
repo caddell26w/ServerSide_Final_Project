@@ -16,6 +16,7 @@ export default function LoginScreen() {
     const [visiblePasswordText, setVisiblePasswordText] = useState('');
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
 
+    // retrieves data from app.py
     async function login() {
         let url = 'http://localhost:8429/login'
         let packet = {
@@ -41,22 +42,32 @@ export default function LoginScreen() {
         
     }
 
+    /*
+    Input: password after user enters a character
+    Output: new hidden password after taking the input
+    Purpose: to turn the user password into a hidden password
+    */
     function hidePassword(passwordText:string) {
         let hiddenString = ''
         let passwordLen = passwordText.length
         for (let char of passwordText) {
             hiddenString += '*'
             if ((char != '*') && (passwordLen > password.length)) {
-                setPassword(password + char)
+                setPassword(password + char) // sets the actual user password, not the shown password
             }
         }
         if ((passwordLen) < password.length) {
             setPassword(password.substring(0, passwordLen))
             hiddenString = (hiddenString.substring(0, passwordLen))
         }
-        setVisiblePasswordText(hiddenString)
+        setVisiblePasswordText(hiddenString) 
     }
 
+    /*
+    Input: password after user enters a character
+    Output: new shown password after taking the input
+    Purpose: to turn potentially hidden password visible for user visibility
+    */
     function showPassword(passwordText:string) {
         if (passwordText.includes('*')) {
             setVisiblePasswordText(password)
@@ -67,6 +78,8 @@ export default function LoginScreen() {
         }
     }
 
+    
+    // Purpose: call one of the function above according to password visibility
     function passwordLockPressed() {
         !isPasswordLockToggled? hidePassword(visiblePasswordText) : showPassword(visiblePasswordText)
         setIsPasswordLockToggled(!isPasswordLockToggled)

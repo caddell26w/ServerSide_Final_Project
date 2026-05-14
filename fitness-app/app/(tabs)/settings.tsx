@@ -22,6 +22,11 @@ export default function HomeScreen() {
     }
 
 
+    /*
+    Input: the info needed to display
+    Output: None 
+    Purpose: Goals and Friends are lists, python returns list, so we need to transform to typescript array
+    */
     function setDataValues(userValue:string, profilePictureValue:string, goalsValue:string[], friendsListValue:string[]) {
         setUser(userValue)
         setProfilePicture(profilePictureValue)
