@@ -74,6 +74,8 @@ def login():
         res = make_response(jsonify({'message': 'Success'}))
         res.set_cookie('session_id', session_id, samesite='None', secure=True)
         return(res)
+    else:
+        print("Incorrect Password!")
 
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
@@ -123,12 +125,38 @@ def accountSettings():
     elif request.method == 'PUT':
         return jsonify({'status' : 'SUCCESS', 'body': ''})
 
+@app.route("/delete", methods=['DELETE'])
+def deleteAccount():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    req = request.get_json()
+    reqdata = req['data']
+    userName = reqdata['username']
+    reqId = database.get_userid(userName)
+
+    if reqId == user_id:
+        print(f"\nSUCCESS, USER ID = {user_id}\n")
+    else:
+        print(f"\nWRONG USER\n")
+
+    database.delete_user(user_id)
+    if token:
+        res = make_response(jsonify({'message': 'success'}))
+        res.delete_cookie('session_id')
+        return(res)
+        
+    return jsonify({'status' : 'error', 'body': 'no_cookie'})
+
 """
 Input: token from the cookie
 Output: user_id according to cookie
 Purpose: get the user_id for verification according to the page we're on
 """
 def getUserid(token:str):
+    print(f'\nTOKEN: {token}\n')
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
     stored_ids = R_Server.get(f"session:{token}")

@@ -1,10 +1,12 @@
 import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView} from 'react-native';
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useWindowDimensions } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 
 export default function HomeScreen() {
     const {width, height} = useWindowDimensions();
+    const router = useRouter()
 
     const navigation = useNavigation();
 
@@ -44,6 +46,31 @@ export default function HomeScreen() {
         setFriendsList(friendList)
     }
 
+    async function deleteAccount() {
+        let url = 'http://localhost:8429/delete'
+        let packet = {
+            action: 'LOGIN',
+            data: {
+                'username':`${user}`,
+            }
+        }
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {
+            if (json.message === 'success'){
+            
+            router.navigate("../login")
+            }
+        })
+        
+    }
+
     function displayGoals() {
         let goalString = ''
         for (let goal of goals) {
@@ -52,7 +79,7 @@ export default function HomeScreen() {
         return goalString
     }
 
-    useEffect(() => {
+    useFocusEffect(() => {
         fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList)}})
@@ -61,7 +88,7 @@ export default function HomeScreen() {
             navigation.getParent()?.navigate('index')
         })
         
-    }, [])
+    })
 
     return (
         <View
@@ -152,7 +179,8 @@ export default function HomeScreen() {
                     Add new goal
                 </Text>
             </Pressable>
-            <Pressable>
+            <Pressable
+                onPress={() => deleteAccount()}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Delete account

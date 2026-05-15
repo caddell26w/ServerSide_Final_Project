@@ -34,7 +34,6 @@ export default function LoginScreen() {
             body: JSON.stringify(packet),
             credentials: 'include',
         })
-
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
