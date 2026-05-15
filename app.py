@@ -8,7 +8,7 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
-CORS(app, supports_credentials='true', origins=['http://localhost:8081', 'https://localhost'])
+CORS(app, supports_credentials='true', origins=['http://localhost:8081', 'https://localhost', 'https://localhost:443'])
 database.database_init()
 
 R_Server = redis.StrictRedis()
@@ -20,7 +20,6 @@ except:
 
 @app.route("/", methods=['GET'])
 def index():
-    print("HERE")
     return jsonify({"body": "Hello"})
 
 @app.route("/register", methods=["POST", 'OPTIONS'])
@@ -32,16 +31,13 @@ def register():
     username = reqData['username']
     password = reqData['password']
     confirmedPassword = reqData['confirmedPassword']
-    print(username, password, confirmedPassword)
 
     usernameAvailability = database.username_check(username)
-    print(usernameAvailability)
     if usernameAvailability == True: #Username Available
-        # HERE
         database.user_register(username, password)
         # Create Token
         session_id = str(uuid.uuid4())
-        user_id = 1
+        user_id = database.get_userid(username)
         token = {"session_id": session_id, "user_id": user_id}
 
         R_Server.set(
@@ -67,7 +63,7 @@ def login():
     if loginStatus == True: #Successful Login
         # IF Verified
         session_id = str(uuid.uuid4())
-        user_id = 1
+        user_id = database.get_userid(username)
         token = {"session_id": session_id, "user_id": user_id}
 
         R_Server.set(
@@ -102,7 +98,7 @@ def getDailyWorkout():
         return user_id
 
     currentDate = date.today()
-    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     day = days[currentDate.weekday()]
    
     dayWorkout = database.get_workoutPlan(user_id).get(f'{day.lower()}Workout')
@@ -116,8 +112,8 @@ def accountSettings():
         return user_id
 
     if request.method == 'GET':
-        user = database.get_username(userid)
-        accountInfo = database.get_accountInfo(userid)
+        user = database.get_username(user_id)
+        accountInfo = database.get_accountInfo(user_id)
         profilePicture = accountInfo.get('profilePicture')
         goals = (accountInfo or {}).get('goals')
         friendsList = (accountInfo or {}).get('friendsList')
