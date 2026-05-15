@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
-import { Platform, StyleSheet, View, Text, useWindowDimensions, Pressable} from 'react-native';
+import { Platform, StyleSheet, View, Text, useWindowDimensions, Pressable, TextInput} from 'react-native';
 
 export default function startWorkout() {
     const {width, height} = useWindowDimensions();
@@ -11,10 +11,18 @@ export default function startWorkout() {
     const [day, setDay] = useState('')
     const [dailyWorkout, setDailyWorkout] = useState('')
 
+    const [showTimeButtons, setShowTimeButtons] = useState(false)
+    const [isStopwatchActive, setIsStopwatchActive] = useState(false)
     const [isTimerActive, setIsTimerActive] = useState(false)
+    const [hideStopwatchDisplay, setHideStopwatchDisplay] = useState(true)
+    const [hideTimerLengthDisplay, setHideTimerLengthDisplay] = useState(true)
 
+    const [hours, setHours] = useState(0)
     const [mins, setMins] = useState(0)
     const [secs, setSecs] = useState(0)
+
+    const [timerInput, setTimerInput] = useState('')
+    const [timeInMs, setTimeInMs] = useState(0)
 
     const exerciseDetailsSizing = {
         width: Platform.OS === 'web'? 0.25 * width: 0.70 * width,
@@ -26,19 +34,73 @@ export default function startWorkout() {
         setDailyWorkout(workoutValue)
     }
 
-    // Start the timer
+    function startTimer() {
+        setHideTimerLengthDisplay(true)
+        setTimerInput('')
+        let input = timerInput.split(' ')
+        if (input.length != 2) {
+            throw new Error("String must be in the format [value] [measurement]")
+        }
+        let timeLength = Number(input[0])
+        if (Number.isNaN(timeLength)) {
+            throw new Error("Value for time length in the format [value] [measurement] could not be parsed as a Number")
+        }
+        let secondsList = ['s', 'sec', 'secs', 'second', 'seconds']
+        let minutesList = ['min', 'mins', 'minute', 'minutes']
+        let hoursList = ['hr', 'hrs', 'hour', 'hours']
+        let validMeasurements = [secondsList, minutesList, hoursList].flat()
+        let measurement = input[1]
+        if (!(validMeasurements.includes(measurement))) {
+            throw new Error("Measurement for time length in the format [value] [measurement] is not a valid measurement")
+        }
+        if (secondsList.includes(measurement)) {
+            setTimeInMs(timeLength * 1000)
+            setSecs(timeLength)
+        }
+        else if (minutesList.includes(measurement)) {
+            setTimeInMs(timeLength * (1000 * 60))
+            setMins(timeLength)
+        }
+        else if (hoursList.includes(measurement)) {
+            setTimeInMs(timeLength * (1000 * 60 * 60))
+            setHours(timeLength)
+        }
+        setIsTimerActive(true)
+    }
+
     useEffect(() => {
         if (isTimerActive == true) {
-            let startTime = Date.now()
+            let startTime = Date.now() 
+            startTime += timeInMs
             let timer = setInterval(() => {
                 let currentTime = Date.now()
-                let newMins = Math.floor((currentTime - startTime) / (1000 * 60))
-                let newSecs = Math.round(((currentTime - startTime) / 1000) % 60)
+                let newHours = Math.floor((startTime - currentTime) / (1000 * 60 * 60))
+                let newMins = Math.floor((startTime - currentTime) / (1000 * 60))
+                let newSecs = Math.round(((startTime - currentTime) / 1000) % 60)
+                setHours(newHours)
                 setMins(newMins)
                 setSecs(newSecs)
+                if (newSecs == 0) {
+                    setIsTimerActive(false)
+                }
             }, 1000)
             return () => clearInterval(timer)
         }}, [isTimerActive])
+
+    useEffect(() => {
+        if (isStopwatchActive == true) {
+            let startTime = Date.now()
+            let stopwatch = setInterval(() => {
+                let currentTime = Date.now()
+                let newHours = Math.floor((currentTime - startTime) / (1000 * 60 * 60))
+                let newMins = Math.floor((currentTime - startTime) / (1000 * 60))
+                let newSecs = Math.round(((currentTime - startTime) / 1000) % 60)
+                setHours(newHours)
+                setMins(newMins)
+                setSecs(newSecs)
+            }, 1000)
+            return () => clearInterval(stopwatch)
+        }}, [isStopwatchActive])
     
     useFocusEffect(() => {
         fetch('http://localhost:8429/getDailyWorkout', {credentials: 'include'})
@@ -82,8 +144,9 @@ export default function startWorkout() {
                     }>Skip</Text>
                 </Pressable>
                 <Pressable
-                onPress={() => setIsTimerActive(true)}
-                >
+                onPress={() => {
+                    setShowTimeButtons(true)
+                }}>
                     <Text
                     style={
                         styles.changeButtons
@@ -102,25 +165,106 @@ export default function startWorkout() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 margin: 12
-            }}
-            >
+            }}>   
+                <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    display: showTimeButtons? 'flex': 'none'
+                }}>
+                    <Pressable
+                    onPress={() => {
+                        setHideTimerLengthDisplay(false)
+                        setHideStopwatchDisplay(true)
+                        setIsStopwatchActive(false)
+                    }}>
+                        <Text
+                        style={[styles.changeButtons, {marginRight: 8, padding: 10}]}>
+                            Timer
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        onPress={() => {
+                            setIsStopwatchActive(true)
+                            setHideStopwatchDisplay(false)
+                            setHideTimerLengthDisplay(true)
+                        }}>
+                        <Text
+                        style={[styles.changeButtons, {marginLeft: 8}]}>
+                            Stopwatch
+                        </Text>
+                    </Pressable>
+                </View>
+                <Text 
+                style={{
+                    display: hideStopwatchDisplay? 'none' : 'flex',
+                    fontSize: Platform.OS === 'web'? 18 : 9
+                }}>
+                    Stopwatch:
+                </Text>
+                <Text
+                style={{
+                    display: hideStopwatchDisplay? 'none' : 'flex',
+                    fontSize: Platform.OS === 'web'? 18 : 9
+                }}>
+                    {hours}:{mins < 10? '0' + mins: mins}:{secs < 10? '0' + secs: secs}
+                </Text>
+                <Text
+                style={{
+                    display: hideTimerLengthDisplay? 'none' : 'flex',
+                    fontSize: Platform.OS === 'web'? 18 : 9,
+                    marginTop: 8
+                }}>
+                    Timer Length:
+                </Text>
+                <TextInput
+                placeholder='Ex. 30 secs, 20 mins, 1 hr'
+                value={timerInput}
+                onChangeText={NewText => setTimerInput(NewText)}
+                style={{
+                    display: hideTimerLengthDisplay? 'none' : 'flex',
+                    fontSize: Platform.OS === 'web'? 12 : 6,
+                    padding: 2,
+                    borderWidth: 2,
+                    borderColor: 'black',
+                    borderRadius: 4,
+                    margin: 8
+                }}/>
+                <Pressable
+                onPress={() => startTimer()}>
+                    <Text
+                    style={[styles.changeButtons, {display: hideTimerLengthDisplay? 'none' : 'flex'}]}>
+                        Submit
+                    </Text>
+                </Pressable>
                 <Text 
                 style={{
                     display: isTimerActive? 'flex' : 'none',
                     fontSize: Platform.OS === 'web'? 18 : 9
-                }}
-                >
+                }}>
                     Timer:
                 </Text>
                 <Text
                 style={{
                     display: isTimerActive? 'flex' : 'none',
                     fontSize: Platform.OS === 'web'? 18 : 9
-                }}
-                >
-                    {mins}:{secs < 10? '0' + secs: secs}
+                }}>
+                    {hours}:{mins < 10? '0' + mins: mins}:{secs < 10? '0' + secs: secs}
                 </Text>
             </View>
+            <Pressable
+                onPress={() => {
+                    setIsStopwatchActive(false)
+                }}>
+                <Text 
+                style={[
+                    styles.changeButtons, 
+                    {backgroundColor: 'red', 
+                    display: isStopwatchActive? 'flex' : 'none'
+                }]}>
+                    Stop
+                </Text>
+            </Pressable>
         </View>
     )
 }

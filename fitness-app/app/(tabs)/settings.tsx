@@ -77,7 +77,7 @@ export default function HomeScreen() {
                 alignItems: 'center'
             }}>
                 <Image 
-                    source={{ uri : `http://192.168.143.57:8429/static/users/${profilePicture}`}}
+                    source={{ uri : `http://localhost:8429/static/users/${profilePicture}`}}
                     style={{
                         width: 75,
                         height: 75,
@@ -90,7 +90,7 @@ export default function HomeScreen() {
                         margin: 8
                     }}
                 >
-                    {/* {user} */} Username
+                    {user}
                 </Text>
             </View>
             <View
