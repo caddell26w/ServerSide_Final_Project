@@ -21,7 +21,7 @@ export default function RegisterScreen() {
     const [isConfirmedPasswordLockToggled, setIsConfirmedPasswordLockToggled] = useState(true);
 
     function registerUser() {
-        let url = 'http://127.0.0.1:8429/register'
+        let url = 'http://localhost:8429/register'
         let packet = {
             action: 'REGISTER',
             data: {

@@ -110,6 +110,7 @@ def getDailyWorkout():
 @app.route("/accountSettings", methods=['GET', 'PUT'])
 def accountSettings():
     token = request.cookies.get('session_id')
+    print(f"\nTOKEN BEFORE GET USERID: {token}\n")
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
