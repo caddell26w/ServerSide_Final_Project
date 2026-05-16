@@ -171,6 +171,7 @@ def requestFriend():
     req = request.get_json()
     username = req['data']['username']
     print(username)
+    database.getRequest(user_id, username)
     return(jsonify({'status': 'SUCCESS', 'body':'yay'}))
 
 
@@ -202,11 +203,9 @@ Output: user_id according to cookie
 Purpose: get the user_id for verification according to the page we're on
 """
 def getUserid(token:str):
-    print(f'TOKEN: {token}')
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
     stored_ids = R_Server.get(f"session:{token}")
-    print(f"STORED ID: {stored_ids}")
     if stored_ids is None:
         return jsonify({'status' : 'ERROR', 'body' : 'Current User Not Found'})
     

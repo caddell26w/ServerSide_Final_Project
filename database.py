@@ -225,18 +225,20 @@ def getRequest(userid: int, username: str):
                     WHERE userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
+    requestList = cursor.execute(getRequests,(userid,)).fetchall()
     try:
-        requestList = cursor.execute(getRequests,(userid,))
-        requestList2 = json.loads(requestList)
-        newList = requestList2.append(username)
-        sendList = json.dumps(newList)
+        requestList2 = json.loads(requestList[0][0])
+        requestList2.append(username)
+        sendList = json.dumps(requestList2)
     except:
         print("list not exist")
+        list = [username]
+        sendList = json.dumps(list)
     
     updateRequest = '''UPDATE friendRequest
                         SET requests = ?
                         where userid = ?'''
-    __db.execute(updateRequest(sendList,userid))
+    __db.execute(updateRequest,(sendList,userid))
     __db.commit()
 
 
