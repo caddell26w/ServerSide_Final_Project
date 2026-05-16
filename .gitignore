@@ -24,7 +24,7 @@ expo-env.d.ts
 .metro-health-check*
 
 #python
-*.__pycache__/
+.__pycache__/
 *.pyc
 *.exe
 
