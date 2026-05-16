@@ -2,7 +2,7 @@
 
 # dependencies
 node_modules/
-.venv/
+*.venv/
 
 
 # Expo
@@ -27,6 +27,7 @@ expo-env.d.ts
 __pycache__/
 *.pyc
 *.exe
+
 
 # debug
 npm-debug.*
