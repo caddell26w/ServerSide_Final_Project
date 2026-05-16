@@ -15,6 +15,7 @@ export default function HomeScreen() {
 
     const [inactiveFriendsList, setInactiveFriendsList] = useState([''])
     const [activeFriendsList, setActiveFriendsList] = useState([''])
+    const [requestList , setRequestList] = useState([''])
     const [usersList, setUsersList] = useState([''])
 
 
@@ -74,6 +75,34 @@ export default function HomeScreen() {
             credentials: 'include',
         }).then((resp) => {return resp.json()})
     }
+
+    useEffect(() => {
+        const datafetch = () => {
+            fetch('http://localhost:8429/retrieveRequest', {credentials: 'include'})
+            .then((response) => {
+                return response.json()
+                })
+            .then((json) => {
+            if (json.status === 'ERROR') {
+                throw json.body;
+            }
+                setRequestList(json.body);
+                console.log('request from', json.body);
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+                navigation.getParent()?.navigate('index')
+            })
+        }
+
+        datafetch()
+
+        // run every 5 seconds to check for any friend requests
+        const interval = setInterval(datafetch, 5000)
+        return () => clearInterval(interval)
+            
+            
+    }, [])
 
     useEffect(() => {
         fetch('http://localhost:8429/activeFriends', {credentials: 'include'})

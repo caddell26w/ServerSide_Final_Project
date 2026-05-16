@@ -6,8 +6,10 @@ import redis
 import uuid
 import time
 import json
+from flask_socketio import join_room, leave_room, emit, SocketIO
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 app.secret_key = 'supersecret'
 CORS(app, supports_credentials='true', origins=['http://localhost:8081', 'https://localhost', 'https://localhost:443'])
 database.database_init()
@@ -171,8 +173,24 @@ def requestFriend():
     req = request.get_json()
     username = req['data']['username']
     print(username)
-    database.getRequest(user_id, username)
-    return(jsonify({'status': 'SUCCESS', 'body':'yay'}))
+    database.getRequest(database.get_userid(username), True, database.get_username(user_id))
+
+    #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
+    #SOCKET CODE
+    return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
+
+@app.route("/retrieveRequest", methods=['GET'])
+def getRequest():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    requestList = database.getRequest(user_id, False)
+
+    #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
+    #SOCKET CODE
+    return(jsonify({'status': 'SUCCESS', 'body':requestList}))
 
 
 @app.route("/delete", methods=['DELETE'])
@@ -212,5 +230,6 @@ def getUserid(token:str):
     ids = json.loads(stored_ids)
     user_id = ids["user_id"]
     return user_id
+
 
 app.run(host='0.0.0.0', port=8429, debug=True)

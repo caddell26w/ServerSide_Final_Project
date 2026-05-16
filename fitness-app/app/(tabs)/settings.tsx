@@ -83,7 +83,7 @@ export default function HomeScreen() {
         return goalString
     }
 
-    useFocusEffect(() => {
+    useEffect(() => {
         fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList)}})

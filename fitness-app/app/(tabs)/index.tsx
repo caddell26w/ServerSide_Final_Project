@@ -18,7 +18,7 @@ export default function HomeScreen() {
 
   const [user, setUser] = useState('')
 
-  useFocusEffect(() => {
+  useEffect(() => {
     fetch('http://localhost:8429/getUser', {credentials: 'include'})
     .then((response) => response.json())
     .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setUser(json.body.user)}})

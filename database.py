@@ -220,12 +220,18 @@ def get_friendsList(userid: int) -> str:
         friendsList = row[0]
         return friendsList
 
-def getRequest(userid: int, username: str):
+def getRequest(userid: int,sendFlag: bool, username:str = "" ):
     getRequests = '''SELECT requests from friendRequest
                     WHERE userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
     requestList = cursor.execute(getRequests,(userid,)).fetchall()
+    if sendFlag == False:
+        try:
+            return json.loads(requestList[0][0])
+        except: 
+            print("RETURN NOT WORK")
+            return []
     try:
         requestList2 = json.loads(requestList[0][0])
         requestList2.append(username)
