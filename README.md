@@ -2,7 +2,10 @@
 ## Fitness App User Guide:
 
 ### Get Started:
-1. Navigate to the directory
+1. Navigate to the root directory
+```bash
+    cd .../fitness-app
+```
 2. Install dependencies
 ```bash
     npm install

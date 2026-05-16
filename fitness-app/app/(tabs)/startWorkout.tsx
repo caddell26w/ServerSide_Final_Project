@@ -88,6 +88,9 @@ export default function startWorkout() {
 
     useEffect(() => {
         if (isStopwatchActive == true) {
+            setHours(0)
+            setMins(0)
+            setSecs(0)
             let startTime = Date.now()
             let stopwatch = setInterval(() => {
                 let currentTime = Date.now()
@@ -145,6 +148,10 @@ export default function startWorkout() {
                 <Pressable
                 onPress={() => {
                     setShowTimeButtons(true)
+                    setIsTimerActive(false)
+                    setIsStopwatchActive(false)
+                    setHideStopwatchDisplay(true)
+                    setHideTimerLengthDisplay(true)
                 }}>
                     <Text
                     style={
@@ -176,6 +183,7 @@ export default function startWorkout() {
                         setHideTimerLengthDisplay(false)
                         setHideStopwatchDisplay(true)
                         setIsStopwatchActive(false)
+                        setShowTimeButtons(false)
                     }}>
                         <Text
                         style={[styles.changeButtons, {marginRight: 8, padding: 10}]}>
@@ -187,6 +195,7 @@ export default function startWorkout() {
                             setIsStopwatchActive(true)
                             setHideStopwatchDisplay(false)
                             setHideTimerLengthDisplay(true)
+                            setShowTimeButtons(false)
                         }}>
                         <Text
                         style={[styles.changeButtons, {marginLeft: 8}]}>

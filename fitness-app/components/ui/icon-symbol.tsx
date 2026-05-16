@@ -22,6 +22,7 @@ const MAPPING = {
   'gearshape':'settings',
   'lock':'lock-outline',
   'lock.open':'lock-open',
+  'person.badge.plus': 'person-add-alt-1'
 } as IconMapping;
 
 /**

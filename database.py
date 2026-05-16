@@ -103,6 +103,16 @@ def get_username(userid: int) -> str:
         username = row[0]
         return username
 
+def get_users() -> str:
+    table_query = '''SELECT username from accounts'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+    userList = []
+    for row in cursor.execute(table_query):
+        userList.append(row[0])
+    return userList
+
+
 def update_password(currentPassword: str, newPassword: str, userid: int) -> bool:
     table_query = '''SELECT * from accounts
                      WHERE rowid = ?'''
@@ -163,6 +173,15 @@ def get_accountInfo(userid: int) -> dict:
     for row in cursor.execute(table_query, (userid,)):
         accountInfo = {'userid': row[0], 'profilePicture': row[1], 'goals': row[2], 'friendsList': row[3]}
         return accountInfo
+
+def get_friendsList(userid: int) -> str:
+    table_query = '''SELECT friendsList from accountInfo
+                     WHERE userid = ?'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+    for row in cursor.execute(table_query, (userid,)):
+        friendsList = row[0]
+        return friendsList
 
 def get_workoutPlan(userid: int) -> dict:
     table_query = '''SELECT * from workoutPlan

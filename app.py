@@ -17,6 +17,7 @@ try:
 except:
     print("REDIS: Not Running -- No Streams Available")
     R_Server = None
+R_Server.flushall()
 
 @app.route("/", methods=['GET'])
 def index():
@@ -117,9 +118,33 @@ def accountSettings():
         profilePicture = accountInfo.get('profilePicture')
         goals = (accountInfo or {}).get('goals')
         friendsList = (accountInfo or {}).get('friendsList')
+        if friendsList == None:
+            friendsList = []
         return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
     elif request.method == 'PUT':
         return jsonify({'status' : 'SUCCESS', 'body': ''})
+    
+@app.route("/activeFriends", methods=['GET'])
+def activeFriends():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    friendsList = database.get_friendsList(user_id)
+    friendsList = ['admin']
+    if friendsList == None:
+        return (jsonify({'status': 'SUCCESS', 'body': {'activeFriendsList' : []}}))
+
+    usersList = database.get_users()
+
+    activeFriendsList = []
+    
+    for key in R_Server.scan_iter("session:*"):
+        session_user = database.get_username(json.loads(R_Server.get(key).decode('utf-8'))['user_id'])
+        if session_user in friendsList:
+            activeFriendsList.append(session_user)
+    return(jsonify({'status': 'SUCCESS', 'body' : {'activeFriendsList' : activeFriendsList, 'usersList' : usersList}}))
 
 def getUserid(token:str):
     if not token:
