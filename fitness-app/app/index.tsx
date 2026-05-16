@@ -20,7 +20,7 @@ export default function RegisterScreen() {
     const [isPasswordLockToggled, setIsPasswordLockToggled] = useState(true);
     const [isConfirmedPasswordLockToggled, setIsConfirmedPasswordLockToggled] = useState(true);
 
-    function registerUser() {
+    async function registerUser() {
         let url = 'http://localhost:8429/register'
         let packet = {
             action: 'REGISTER',
@@ -30,13 +30,13 @@ export default function RegisterScreen() {
                 'confirmedPassword' : `${confirmedPassword}`
             }
         }
-        fetch(url, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json',
             },
             body: JSON.stringify(packet),
-            credentials: 'include'
+            credentials: 'include',
         })
         setUsername('')
         setPassword('')

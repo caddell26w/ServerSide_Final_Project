@@ -58,8 +58,21 @@ export default function HomeScreen() {
         setInactiveFriendsList(inactiveFriends)
     }
     
-    function sendFriendRequest(user: string) {
-        console.log(user)
+    async function sendFriendRequest(user: string) {
+        let url = 'http://localhost:8429/requestFriend'
+        let packet = {
+            data: {
+                'username':`${user}`,
+            }
+        }
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
     }
 
     useEffect(() => {

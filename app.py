@@ -4,6 +4,7 @@ from datetime import date
 import database
 import redis
 import uuid
+import time
 import json
 
 app = Flask(__name__)
@@ -25,8 +26,8 @@ def index():
 
 @app.route("/getUser", methods=['GET'])
 def getUser():
+    time.sleep(0.5)
     token = request.cookies.get('session_id')
-    print(f"\nTOKEN BEFORE GET USERID: {token}\n")
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
@@ -86,7 +87,6 @@ def login():
 
         res = make_response(jsonify({'message': 'Success'}))
         res.set_cookie('session_id', session_id, samesite='None', secure=True)
-        print("\nLOGIN WORKS\n")
         return(res)
     else:
         print("Incorrect Password!")
@@ -94,7 +94,6 @@ def login():
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
     token = request.cookies.get('session_id')
-    print(token)
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
@@ -123,7 +122,6 @@ def getDailyWorkout():
 @app.route("/accountSettings", methods=['GET', 'PUT'])
 def accountSettings():
     token = request.cookies.get('session_id')
-    print(f"\nTOKEN BEFORE GET USERID: {token}\n")
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
@@ -163,6 +161,19 @@ def activeFriends():
             activeFriendsList.append(session_user)
     return(jsonify({'status': 'SUCCESS', 'body' : {'activeFriendsList' : activeFriendsList, 'usersList' : usersList}}))
 
+@app.route("/requestFriend", methods=['PUT'])
+def requestFriend():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    req = request.get_json()
+    username = req['data']['username']
+    print(username)
+    return(jsonify({'status': 'SUCCESS', 'body':'yay'}))
+
+
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():
     token = request.cookies.get('session_id')
@@ -176,15 +187,12 @@ def deleteAccount():
     reqId = database.get_userid(userName)
 
     if reqId == user_id:
-        print(f"\nSUCCESS, USER ID = {user_id}\n")
-    else:
-        print(f"\nWRONG USER\n")
 
-    database.delete_user(user_id)
-    if token:
-        res = make_response(jsonify({'message': 'success'}))
-        res.delete_cookie('session_id')
-        return(res)
+        database.delete_user(user_id)
+        if token:
+            res = make_response(jsonify({'message': 'success'}))
+            res.delete_cookie('session_id')
+            return(res)
         
     return jsonify({'status' : 'error', 'body': 'no_cookie'})
 
@@ -194,11 +202,11 @@ Output: user_id according to cookie
 Purpose: get the user_id for verification according to the page we're on
 """
 def getUserid(token:str):
-    print(f'\nTOKEN: {token}\n')
+    print(f'TOKEN: {token}')
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
     stored_ids = R_Server.get(f"session:{token}")
-    print(f"\nSTORED ID: {stored_ids}\n")
+    print(f"STORED ID: {stored_ids}")
     if stored_ids is None:
         return jsonify({'status' : 'ERROR', 'body' : 'Current User Not Found'})
     

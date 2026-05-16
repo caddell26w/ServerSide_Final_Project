@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 import { Platform, StyleSheet, View, Text, Pressable} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -16,7 +18,7 @@ export default function HomeScreen() {
 
   const [user, setUser] = useState('')
 
-  useEffect(() => {
+  useFocusEffect(() => {
     fetch('http://localhost:8429/getUser', {credentials: 'include'})
     .then((response) => response.json())
     .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setUser(json.body.user)}})
@@ -24,7 +26,7 @@ export default function HomeScreen() {
         console.error('Error:', error)
         navigation.getParent()?.navigate('index')
     })
-  }, [])
+  })
   return (
     <View
       style={{

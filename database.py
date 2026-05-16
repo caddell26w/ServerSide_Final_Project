@@ -1,4 +1,4 @@
-import sqlite3, string, random, hashlib
+import sqlite3, string, random, hashlib, json
 
 def database_init():
     __db = sqlite3.connect("fitness-app.db")
@@ -20,9 +20,13 @@ def database_init():
                         thursdayWorkout TEXT DEFAULT 'thurWorkout',
                         fridayWorkout TEXT DEFAULT 'friWorkout',
                         saturdayWorkout TEXT DEFAULT 'satWorkout')'''
+    table_friendRequest = '''CREATE TABLE IF NOT EXISTS friendRequest
+                            (userid INT NOT NULL,
+                            requests TEXT DEFAULT '')'''
     __db.execute(table_accounts)
     __db.execute(table_accountInfo)
     __db.execute(table_workoutPlan)
+    __db.execute(table_friendRequest)
     __db.commit()
 
 """
@@ -56,8 +60,12 @@ def user_register( username: str, password: str):
     create_workoutPlan = '''INSERT INTO workoutPlan
                             (userid) VALUES
                             (?)'''
+    create_friendRequest = '''INSERT INTO friendRequest
+                            (userid) VALUES
+                            (?)'''
     __db.execute(create_accountInfo, (userid,))
     __db.execute(create_workoutPlan, (userid,))
+    __db.execute(create_friendRequest, (userid,))
     __db.commit()
 
 """
@@ -156,7 +164,7 @@ def update_password(currentPassword: str, newPassword: str, userid: int) -> bool
     update_account = '''UPDATE accounts
                      SET password = ?,
                      WHERE rowid = ?'''
-    __db.execute(update_account, (password, userid))
+    __db.execute(update_account, (new_hashed_password, userid))
     __db.commit()
     return True
 
@@ -212,6 +220,26 @@ def get_friendsList(userid: int) -> str:
         friendsList = row[0]
         return friendsList
 
+def getRequest(userid: int, username: str):
+    getRequests = '''SELECT requests from friendRequest
+                    WHERE userid = ?'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+    try:
+        requestList = cursor.execute(getRequests,(userid,))
+        requestList2 = json.loads(requestList)
+        newList = requestList2.append(username)
+        sendList = json.dumps(newList)
+    except:
+        print("list not exist")
+    
+    updateRequest = '''UPDATE friendRequest
+                        SET requests = ?
+                        where userid = ?'''
+    __db.execute(updateRequest(sendList,userid))
+    __db.commit()
+
+
 def get_workoutPlan(userid: int) -> dict:
     table_query = '''SELECT * from workoutPlan
                      WHERE userid = ?'''
@@ -238,10 +266,13 @@ def delete_user(userid: int):
                             WHERE userid = ?'''
     delete_workoutPlan = '''DELETE FROM workoutPlan
                             WHERE userid = ?'''
+    delete_friendRequest='''DELETE FROM friendRequest
+                        where userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(delete_account, (userid,))
     __db.execute(delete_accountInfo, (userid,))
     __db.execute(delete_workoutPlan, (userid,))
+    __db.execute(delete_friendRequest, (userid,))
     __db.commit()
 
 if __name__ == '__main__':
