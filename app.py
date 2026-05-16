@@ -26,6 +26,7 @@ def index():
 @app.route("/getUser", methods=['GET'])
 def getUser():
     token = request.cookies.get('session_id')
+    print(f"\nTOKEN BEFORE GET USERID: {token}\n")
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
@@ -85,6 +86,7 @@ def login():
 
         res = make_response(jsonify({'message': 'Success'}))
         res.set_cookie('session_id', session_id, samesite='None', secure=True)
+        print("\nLOGIN WORKS\n")
         return(res)
     else:
         print("Incorrect Password!")
@@ -196,6 +198,7 @@ def getUserid(token:str):
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
     stored_ids = R_Server.get(f"session:{token}")
+    print(f"\nSTORED ID: {stored_ids}\n")
     if stored_ids is None:
         return jsonify({'status' : 'ERROR', 'body' : 'Current User Not Found'})
     

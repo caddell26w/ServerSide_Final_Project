@@ -123,13 +123,11 @@ def get_username(userid: int) -> str:
         username = row[0]
         return username
 
-<<<<<<< HEAD
 """
 Input: passwords and userid
 Output: whether it worked or not
 Purpose: Ensure security by ensuring hashing/salting and verification
 """
-=======
 def get_users() -> str:
     table_query = '''SELECT username from accounts'''
     __db = sqlite3.connect("fitness-app.db")
@@ -140,7 +138,6 @@ def get_users() -> str:
     return userList
 
 
->>>>>>> main
 def update_password(currentPassword: str, newPassword: str, userid: int) -> bool:
     table_query = '''SELECT * from accounts
                      WHERE rowid = ?'''

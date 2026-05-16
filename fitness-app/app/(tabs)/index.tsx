@@ -17,7 +17,7 @@ export default function HomeScreen() {
   const [user, setUser] = useState('')
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8429/getUser', {credentials: 'include'})
+    fetch('http://localhost:8429/getUser', {credentials: 'include'})
     .then((response) => response.json())
     .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setUser(json.body.user)}})
     .catch((error) => {
