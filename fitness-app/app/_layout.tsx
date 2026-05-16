@@ -17,8 +17,14 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: "modal"}}/>
-        <Stack.Screen name="index" options={{ title: 'Welcome! Please register an account with us below.', headerLeft: () => null}}/>
-        <Stack.Screen name="login" options={{ title: 'Welcome! Please log in to your account.', headerLeft: () => null}}/>
+        <Stack.Screen name="index" options={{ title: 'Welcome! Please register an account with us below.', 
+                                              headerStyle: { backgroundColor: '#042130'}, 
+                                              headerTitleStyle: {color: '#CCB414'},
+                                              headerLeft: () => null}}/>
+        <Stack.Screen name="login" options={{ title: 'Welcome! Please log in to your account.', 
+                                              headerStyle: { backgroundColor: '#042130'}, 
+                                              headerTitleStyle: {color: '#CCB414'},
+                                              headerLeft: () => null}}/>
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

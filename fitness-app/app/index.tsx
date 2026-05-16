@@ -112,13 +112,13 @@ export default function RegisterScreen() {
         <View
             style={{
                 flex: 1,
-                backgroundColor: 'white',
+                backgroundColor: '#0b2f42',
                 justifyContent: 'center',
                 alignItems: 'center'
             }}>
             <Text
                 style={{
-                    color: 'black',
+                    color: '#D2B80F',
                     fontWeight: 'bold',
                     fontSize: 20
                 }}>
@@ -126,7 +126,7 @@ export default function RegisterScreen() {
             </Text>
             <TextInput
                 placeholder="Username"
-                placeholderTextColor={'black'}
+                placeholderTextColor={'#D2B80F'}
                 value={username}
                 onChangeText={newText => setUsername(newText)}
                 style={{
@@ -134,7 +134,9 @@ export default function RegisterScreen() {
                     width: Platform.OS === 'web' ? 0.35 * width : 0.55 * width,
                     padding: 5,
                     margin: 8,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    borderColor: '#0f4e70',
+                    color: '#D2B80F'
                 }}
             />
             <View
@@ -144,7 +146,7 @@ export default function RegisterScreen() {
                 }}>
                 <TextInput
                     placeholder="Password"
-                    placeholderTextColor={'black'}
+                    placeholderTextColor={'#D2B80F'}
                     value={visiblePasswordText}
                     onChangeText={(newText) => {isPasswordLockToggled? hidePassword(newText) : showPassword(newText)}}
                     style={{
@@ -153,14 +155,16 @@ export default function RegisterScreen() {
                         padding: 5,
                         margin: 8,
                         marginLeft: 36, //margin + size of icon
-                        borderWidth: 1
+                        borderWidth: 1,
+                        borderColor: '#0f4e70',
+                        color: '#D2B80F'
                     }}
                 />
                 <Pressable
                     onPress={() => 
                         passwordLockPressed()
                     }>
-                    <IconSymbol size={28} name={isPasswordLockToggled? 'lock' : 'lock.open'} color={"#000000"}/>
+                    <IconSymbol size={28} name={isPasswordLockToggled? 'lock' : 'lock.open'} color={"#D2B80F"}/>
                 </Pressable>
             </View>
             <View
@@ -170,7 +174,7 @@ export default function RegisterScreen() {
                 }}>
                 <TextInput
                     placeholder="Confirm Password"
-                    placeholderTextColor={'black'}
+                    placeholderTextColor={'#D2B80F'}
                     value={visibleConfirmedPasswordText}
                     onChangeText={(newText) => {isConfirmedPasswordLockToggled? hideConfirmedPassword(newText) : showConfirmedPassword(newText)}}
                     style={{
@@ -180,19 +184,22 @@ export default function RegisterScreen() {
                         margin: 8,
                         marginLeft: 36,
                         borderWidth: 1,
+                        borderColor: '#0f4e70',
+                        color: '#D2B80F'
                     }}
                 />
                 <Pressable
                     onPress={() => 
                         confirmedPasswordLockPressed()
                     }>
-                    <IconSymbol size={28} name={isConfirmedPasswordLockToggled? 'lock' : 'lock.open'} color={'#000000'}/>
+                    <IconSymbol size={28} name={isConfirmedPasswordLockToggled? 'lock' : 'lock.open'} color={'#D2B80F'}/>
                 </Pressable>
             </View>
             <Link href='/login' 
                 style={{
                     marginVertical: 4, 
-                    marginLeft: 0.2575 * width
+                    marginLeft: 0.2575 * width,
+                    color: '#D2B80F'
                 }}>
                 <Text>
                     Already have an account?

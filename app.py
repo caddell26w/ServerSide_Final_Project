@@ -23,6 +23,17 @@ R_Server.flushall()
 def index():
     return jsonify({"body": "Hello"})
 
+@app.route("/getUser", methods=['GET'])
+def getUser():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    user = database.get_username(user_id)
+
+    return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}'}})
+
 @app.route("/register", methods=["POST", 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
@@ -92,7 +103,6 @@ def changeWorkout():
 
 @app.route("/getDailyWorkout", methods=['GET'])
 def getDailyWorkout():
-    print(len(request.cookies))
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:

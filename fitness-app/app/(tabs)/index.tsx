@@ -1,5 +1,7 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View, Text} from 'react-native';
+import { Platform, StyleSheet, View, Text, Pressable} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useNavigation, useRouter } from 'expo-router';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -8,15 +10,111 @@ import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
+    const router = useRouter();
+  
+  const navigation = useNavigation()
+
+  const [user, setUser] = useState('')
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:8429/getUser', {credentials: 'include'})
+    .then((response) => response.json())
+    .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setUser(json.body.user)}})
+    .catch((error) => {
+        console.error('Error:', error)
+        navigation.getParent()?.navigate('index')
+    })
+  }, [])
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#0b2f42',
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Text>Text</Text>
+      <Text 
+      style={{
+        fontSize: 24,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        fontWeight: '700',
+        color: '#D2B80F',
+        margin: 8, 
+        }}>
+        Welcome {user} to your fitness app experience!</Text>
+        <View
+        style={{
+          flex: 1,
+          width: '100%',
+          flexDirection: 'column'
+        }}>
+          <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            width: '100%'
+          }}>
+            <Pressable
+            onPress={() => router.navigate('/startWorkout')}
+            style={{
+              width: '50%'
+            }}>
+              <Text style={styles.homeButtons}>
+                Begin your daily workout
+              </Text>
+            </Pressable>
+            <Pressable
+            onPress={() => router.navigate('/friends')}
+            style={{
+              width: '50%'
+            }}>
+              <Text style={styles.homeButtons}>
+                View your current friends or send friend requests
+              </Text>
+            </Pressable>
+          </View>
+          <View
+          style={{
+            flexDirection: 'row',
+            flex: 1,
+          }}>
+            <Pressable
+            onPress={() => router.navigate('/mode')}
+            style={{
+              width: '50%',
+            }}>
+              <Text style={styles.homeButtons}>
+              Edit your workouts for this week
+              </Text>
+            </Pressable>
+            <Pressable
+            onPress={() => router.navigate('/activity')}
+            style={{
+              width: '50%'
+            }}>
+              <Text style={styles.homeButtons}>
+              View your recent activity
+              </Text>
+            </Pressable>
+          </View>
+          <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            width: '100%',
+            justifyContent: 'center'
+          }}>
+            <Pressable
+            onPress={() => router.navigate('/settings')}
+            style={{
+              width: '50%'
+            }}>
+              <Text style={styles.homeButtons}>
+              Update your account settings
+              </Text>
+            </Pressable>
+          </View>
+        </View>
     </View>
 
   //   <ParallaxScrollView
@@ -89,20 +187,21 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  homeButtons: {
+    display: 'flex',
+    flex: 1,
+    margin: 24,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontSize: Platform.OS === 'web'? 28: 14,
+    fontWeight: '500',
+    color: '#D2B80F',
+    textAlign: 'center',
+    alignSelf: 'stretch',
     alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderRadius: 48, 
+    borderColor: '#0f4e70',
+    backgroundColor: '#054161',
   },
 });

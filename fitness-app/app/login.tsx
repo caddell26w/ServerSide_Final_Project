@@ -74,13 +74,13 @@ export default function LoginScreen() {
         <View
             style={{
                 flex: 1,
-                backgroundColor: 'white',
+                backgroundColor: '#0b2f42',
                 justifyContent: 'center',
                 alignItems: 'center'
             }}>
             <Text
                 style={{
-                    color: 'black',
+                    color: '#D2B80F',
                     fontWeight: 'bold',
                     fontSize: 20
                 }}>
@@ -88,7 +88,7 @@ export default function LoginScreen() {
             </Text>
             <TextInput
                 placeholder="Username"
-                placeholderTextColor={'black'}
+                placeholderTextColor={'#D2B80F'}
                 value={username}
                 onChangeText={newText => setUsername(newText)}
                 style={{
@@ -96,7 +96,9 @@ export default function LoginScreen() {
                     width: Platform.OS === 'web' ? 0.35 * width : 0.55 * width,
                     padding: 5,
                     margin: 8,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    borderColor: '#0f4e70',
+                    color: '#D2B80F'
                 }}
             />
             <View
@@ -106,7 +108,7 @@ export default function LoginScreen() {
                 }}>
                 <TextInput
                     placeholder="Password"
-                    placeholderTextColor={'black'}
+                    placeholderTextColor={'#D2B80F'}
                     value={visiblePasswordText}
                     onChangeText={newText => {isPasswordLockToggled? hidePassword(newText) : showPassword(newText)}}
                     style={{
@@ -116,14 +118,16 @@ export default function LoginScreen() {
                         marginTop: 8,
                         marginLeft: 36,
                         marginHorizontal: 8,
-                        borderWidth: 1
+                        borderWidth: 1,
+                        borderColor: '#0f4e70',
+                        color: '#D2B80F'
                     }}
                 />
                 <Pressable
                     onPress={() => 
                         passwordLockPressed()
                     }>
-                    <IconSymbol size={28} name={isPasswordLockToggled? 'lock' : 'lock.open'} color={"#000000"}
+                    <IconSymbol size={28} name={isPasswordLockToggled? 'lock' : 'lock.open'} color={"#D2B80F"}
                     style={{
                         marginTop: 8
                     }}
@@ -133,7 +137,8 @@ export default function LoginScreen() {
             <Link href='/' 
                 style={{
                     marginVertical: 4, 
-                    marginLeft: 0.30 * width
+                    marginLeft: 0.30 * width,
+                    color: '#D2B80F'
                 }}>
                 <Text>
                     Don't have an account?

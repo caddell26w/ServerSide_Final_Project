@@ -43,6 +43,10 @@ export default function HomeScreen() {
         let goalString = ''
         for (let goal of goals) {
             goalString += `- ${goal}\n`
+            if (goal === 'None') {
+                goalString = `No Current Goals`
+            }
+            
         }
         return goalString
     }
@@ -62,7 +66,7 @@ export default function HomeScreen() {
         <View
         style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: '#0b2f42',
             justifyContent: 'center',
             alignItems: 'center',
         }}>
@@ -82,6 +86,8 @@ export default function HomeScreen() {
                     style={{
                         fontSize: 24,
                         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                        fontWeight: '700',
+                        color: '#D2B80F',
                         margin: 8
                     }}
                 >
@@ -118,11 +124,12 @@ export default function HomeScreen() {
                                 style={{
                                     fontSize: Platform.OS === 'web'? 14 : 7,
                                     borderBottomWidth: 1.5,
+                                    borderColor: '#0f4e70',
                                     borderStyle: 'dashed',
-                                    padding: 3,
+                                    padding: 8,
                                     width: '100%'
                                 }}>
-                                {friend}</Text>
+                                {friend == ''? 'No Friends Added': friend}</Text>
                             ))}
                             </View>
                         </Text>
@@ -162,10 +169,14 @@ const styles = StyleSheet.create({
         margin: 10
     },
     dayTitle: {
+        display: 'flex',
         fontSize: Platform.OS === 'web'? 18 : 9,
+        fontWeight: '500',
+        color: '#D2B80F',
         padding: 8,
+        justifyContent: 'center',
         textAlign: 'center',
-        borderColor: 'black',
+        borderColor: '#0f4e70',
         borderTopRightRadius: 8,
         borderTopLeftRadius: 8,
         borderWidth: 3,
@@ -174,7 +185,8 @@ const styles = StyleSheet.create({
     },
     exerciseDetails: {
         fontSize: Platform.OS === 'web'? 14 : 7,
-        borderColor: 'black',
+        color: '#D2B80F',
+        borderColor: '#0f4e70',
         borderBottomRightRadius: 8,
         borderBottomLeftRadius: 8,
         borderWidth: 3,
@@ -189,7 +201,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         fontWeight: '500',
         fontSize: Platform.OS === 'web'? 14 : 7,
-        backgroundColor: 'black',
+        backgroundColor: '#0f4e70',
         color: 'white',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         textTransform: 'uppercase',

@@ -59,19 +59,22 @@ export default function changeWorkoutScreen() {
         <View
         style={{
                 flex: 1,
-                backgroundColor: 'white',
+                backgroundColor: '#0b2f42',
                 justifyContent: 'center',
                 alignItems: 'center',
             }}>
             <Text
             style={{
-                margin: 16
+                margin: 16,
+                color: '#D2B80F',
+                fontSize: Platform.OS === 'web'? 24 : 12,
+                fontWeight: '700'
             }}
             >Workout Plan</Text>
             <View
             style={{
                 flexDirection: Platform.OS === 'web'? 'column' : 'row',
-                backgroundColor: 'white',
+                backgroundColor: '#0b2f42',
                 justifyContent: 'center',
                 alignItems: 'center',
             }}>
@@ -87,7 +90,7 @@ export default function changeWorkoutScreen() {
                                 styles.exerciseDetails, 
                                 exerciseDetailsSizing]}
                             placeholder='Exercise Name'
-                            placeholderTextColor={'black'}
+                            placeholderTextColor={'#D2B80F'}
                             multiline={true}
                             onChangeText={NewText => setSundayWorkout(NewText)}
                         />
@@ -110,7 +113,7 @@ export default function changeWorkoutScreen() {
                                 styles.exerciseDetails, 
                                 exerciseDetailsSizing]}
                             placeholder='Exercise Name'
-                            placeholderTextColor={'black'}
+                            placeholderTextColor={'#D2B80F'}
                             multiline={true}
                             onChangeText={NewText => setMondayWorkout(NewText)}
                         />
@@ -133,7 +136,7 @@ export default function changeWorkoutScreen() {
                                 styles.exerciseDetails, 
                                 exerciseDetailsSizing]}
                             placeholder='Exercise Name'
-                            placeholderTextColor={'black'}
+                            placeholderTextColor={'#D2B80F'}
                             multiline={true}
                             onChangeText={NewText => setTuesdayWorkout(NewText)}
                         />
@@ -158,7 +161,7 @@ export default function changeWorkoutScreen() {
                                 styles.exerciseDetails, 
                                 exerciseDetailsSizing]}
                             placeholder='Exercise Name'
-                            placeholderTextColor={'black'}
+                            placeholderTextColor={'#D2B80F'}
                             multiline={true}
                             onChangeText={NewText => setWednesdayWorkout(NewText)}
                         />
@@ -186,7 +189,7 @@ export default function changeWorkoutScreen() {
                                     styles.exerciseDetails, 
                                     exerciseDetailsSizing]}
                                 placeholder='Exercise Name'
-                                placeholderTextColor={'black'}
+                                placeholderTextColor={'#D2B80F'}
                                 multiline={true}
                                 onChangeText={NewText => setThursdayWorkout(NewText)}
                             />
@@ -212,7 +215,7 @@ export default function changeWorkoutScreen() {
                                     styles.exerciseDetails, 
                                     exerciseDetailsSizing]}
                                 placeholder='Exercise Name'
-                                placeholderTextColor={'black'}
+                                placeholderTextColor={'#D2B80F'}
                                 multiline={true}
                                 onChangeText={NewText => setFridayWorkout(NewText)}
                             />
@@ -235,7 +238,7 @@ export default function changeWorkoutScreen() {
                                     styles.exerciseDetails, 
                                     exerciseDetailsSizing]}
                                 placeholder='Exercise Name'
-                                placeholderTextColor={'black'}
+                                placeholderTextColor={'#D2B80F'}
                                 multiline={true}
                                 onChangeText={NewText => setSaturdayWorkout(NewText)}
                             />
@@ -263,10 +266,14 @@ const styles = StyleSheet.create({
         margin: 10
     },
     dayTitle: {
+        display: 'flex',
         fontSize: Platform.OS === 'web'? 18 : 9,
+        fontWeight: '500',
+        color: '#D2B80F',
         padding: 8,
+        justifyContent: 'center',
         textAlign: 'center',
-        borderColor: 'black',
+        borderColor: '#0f4e70',
         borderTopRightRadius: 8,
         borderTopLeftRadius: 8,
         borderWidth: 3,
@@ -275,7 +282,7 @@ const styles = StyleSheet.create({
     },
     exerciseDetails: {
         fontSize: Platform.OS === 'web'? 14 : 7,
-        borderColor: 'black',
+        borderColor: '#0f4e70',
         borderBottomRightRadius: 8,
         borderBottomLeftRadius: 8,
         borderWidth: 3,
@@ -290,7 +297,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         fontWeight: '500',
         fontSize: Platform.OS === 'web'? 14 : 7,
-        backgroundColor: 'black',
+        backgroundColor: '#0f4e70',
         color: 'white',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         textTransform: 'uppercase',
