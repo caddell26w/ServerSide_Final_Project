@@ -89,6 +89,9 @@ export default function startWorkout() {
 
     useEffect(() => {
         if (isStopwatchActive == true) {
+            setHours(0)
+            setMins(0)
+            setSecs(0)
             let startTime = Date.now()
             let stopwatch = setInterval(() => {
                 let currentTime = Date.now()
@@ -116,7 +119,7 @@ export default function startWorkout() {
         <View
         style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: '#0b2f42',
             justifyContent: 'center',
             alignItems: 'center',
             }}>
@@ -146,6 +149,10 @@ export default function startWorkout() {
                 <Pressable
                 onPress={() => {
                     setShowTimeButtons(true)
+                    setIsTimerActive(false)
+                    setIsStopwatchActive(false)
+                    setHideStopwatchDisplay(true)
+                    setHideTimerLengthDisplay(true)
                 }}>
                     <Text
                     style={
@@ -177,6 +184,7 @@ export default function startWorkout() {
                         setHideTimerLengthDisplay(false)
                         setHideStopwatchDisplay(true)
                         setIsStopwatchActive(false)
+                        setShowTimeButtons(false)
                     }}>
                         <Text
                         style={[styles.changeButtons, {marginRight: 8, padding: 10}]}>
@@ -188,6 +196,7 @@ export default function startWorkout() {
                             setIsStopwatchActive(true)
                             setHideStopwatchDisplay(false)
                             setHideTimerLengthDisplay(true)
+                            setShowTimeButtons(false)
                         }}>
                         <Text
                         style={[styles.changeButtons, {marginLeft: 8}]}>
@@ -198,14 +207,16 @@ export default function startWorkout() {
                 <Text 
                 style={{
                     display: hideStopwatchDisplay? 'none' : 'flex',
-                    fontSize: Platform.OS === 'web'? 18 : 9
+                    fontSize: Platform.OS === 'web'? 18 : 9,
+                    color: '#D2B80F'
                 }}>
                     Stopwatch:
                 </Text>
                 <Text
                 style={{
                     display: hideStopwatchDisplay? 'none' : 'flex',
-                    fontSize: Platform.OS === 'web'? 18 : 9
+                    fontSize: Platform.OS === 'web'? 18 : 9,
+                    color: '#D2B80F'
                 }}>
                     {hours}:{mins < 10? '0' + mins: mins}:{secs < 10? '0' + secs: secs}
                 </Text>
@@ -213,20 +224,23 @@ export default function startWorkout() {
                 style={{
                     display: hideTimerLengthDisplay? 'none' : 'flex',
                     fontSize: Platform.OS === 'web'? 18 : 9,
-                    marginTop: 8
+                    marginTop: 8,
+                    color: '#D2B80F'
                 }}>
                     Timer Length:
                 </Text>
                 <TextInput
                 placeholder='Ex. 30 secs, 20 mins, 1 hr'
+                placeholderTextColor={'#D2B80F'}
                 value={timerInput}
                 onChangeText={NewText => setTimerInput(NewText)}
                 style={{
                     display: hideTimerLengthDisplay? 'none' : 'flex',
                     fontSize: Platform.OS === 'web'? 12 : 6,
                     padding: 2,
+                    color: '#D2B80F',
                     borderWidth: 2,
-                    borderColor: 'black',
+                    borderColor: '#0f4e70',
                     borderRadius: 4,
                     margin: 8
                 }}/>
@@ -240,14 +254,16 @@ export default function startWorkout() {
                 <Text 
                 style={{
                     display: isTimerActive? 'flex' : 'none',
-                    fontSize: Platform.OS === 'web'? 18 : 9
+                    fontSize: Platform.OS === 'web'? 18 : 9,
+                    color: '#D2B80F'
                 }}>
                     Timer:
                 </Text>
                 <Text
                 style={{
                     display: isTimerActive? 'flex' : 'none',
-                    fontSize: Platform.OS === 'web'? 18 : 9
+                    fontSize: Platform.OS === 'web'? 18 : 9,
+                    color: '#D2B80F'
                 }}>
                     {hours}:{mins < 10? '0' + mins: mins}:{secs < 10? '0' + secs: secs}
                 </Text>
@@ -274,10 +290,14 @@ const styles = StyleSheet.create({
         margin: 10
     },
     dayTitle: {
+        display: 'flex',
         fontSize: Platform.OS === 'web'? 18 : 9,
+        fontWeight: '500',
+        color: '#D2B80F',
         padding: 8,
+        justifyContent: 'center',
         textAlign: 'center',
-        borderColor: 'black',
+        borderColor: '#0f4e70',
         borderTopRightRadius: 8,
         borderTopLeftRadius: 8,
         borderWidth: 3,
@@ -286,14 +306,15 @@ const styles = StyleSheet.create({
     },
     exerciseDetails: {
         fontSize: Platform.OS === 'web'? 14 : 7,
-        borderColor: 'black',
+        borderColor: '#0f4e70',
         borderBottomRightRadius: 8,
         borderBottomLeftRadius: 8,
         borderWidth: 3,
         borderStyle: 'solid',
         marginBottom: 8,
         padding: 8,
-        textAlignVertical: 'top'
+        textAlignVertical: 'top',
+        color: '#D2B80F'
     },
     changeButtons: {
         alignSelf: 'center',
@@ -301,7 +322,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         fontWeight: '500',
         fontSize: Platform.OS === 'web'? 14 : 7,
-        backgroundColor: 'black',
+        backgroundColor: '#0f4e70',
         color: 'white',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         textTransform: 'uppercase',

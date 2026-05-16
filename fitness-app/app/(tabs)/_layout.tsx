@@ -13,7 +13,9 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#F2DF4A',
+        tabBarInactiveTintColor: '#CCB414',
+        tabBarStyle: {backgroundColor: '#042130'},
         tabBarLabelStyle: {
           fontSize: Platform.OS === 'web' ? 12 : 7.75,
         },
@@ -25,6 +27,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          tabBarStyle: {display: 'none'},
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />

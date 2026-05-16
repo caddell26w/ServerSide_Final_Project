@@ -6,7 +6,7 @@ export default function HomeScreen() {
         <View
         style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: '#0b2f42',
             justifyContent: 'center',
             alignItems: 'center',
         }}>
