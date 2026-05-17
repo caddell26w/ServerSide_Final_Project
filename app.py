@@ -179,6 +179,39 @@ def requestFriend():
     #SOCKET CODE
     return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
 
+@app.route("/addFriend", methods=['PUT'])
+def addFriend():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    req = request.get_json()
+    username = req['data']['username']
+    friendsList = database.get_friendsList() # ideally returns a string with a list inside
+    friendList = json.loads(friendsList[0][0]) 
+    if friendList is None:
+        friendList = [username]
+    else:
+        friendList.append(username)
+    database.update_accountInfo_friendsList(json.dumps(friendList),user_id)
+    database.getRequest(user_id, True, False, username)
+
+    return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
+
+@app.route("/rejectFriend", methods=['PUT'])
+def addFriend():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    req = request.get_json()
+    username = req['data']['username']
+    database.getRequest(user_id, True, True, username)
+
+    return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
+
 @app.route("/retrieveRequest", methods=['GET'])
 def getRequest():
     token = request.cookies.get('session_id')

@@ -220,7 +220,7 @@ def get_friendsList(userid: int) -> str:
         friendsList = row[0]
         return friendsList
 
-def getRequest(userid: int,sendFlag: bool, username:str = "" ):
+def getRequest(userid: int,sendFlag: bool, removeFlag: bool = False,username:str = ""):
     getRequests = '''SELECT requests from friendRequest
                     WHERE userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
@@ -234,7 +234,10 @@ def getRequest(userid: int,sendFlag: bool, username:str = "" ):
             return []
     try:
         requestList2 = json.loads(requestList[0][0])
-        requestList2.append(username)
+        if username != "" and removeFlag != True:
+            requestList2.append(username)
+        elif username != "" and removeFlag == True:
+            requestList2.remove(username)
         sendList = json.dumps(requestList2)
     except:
         print("list not exist")

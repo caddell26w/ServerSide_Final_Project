@@ -76,6 +76,40 @@ export default function HomeScreen() {
         }).then((resp) => {return resp.json()})
     }
 
+    async function acceptFriendRequest(user: string) {
+        let url = 'http://localhost:8429/addFriend'
+        let packet = {
+            data: {
+                'username': `${user}`
+            }
+        }
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+    }
+
+    async function declineFriendRequest(user :string) {
+        let url = 'http://localhost:8429/rejectFriend'
+        let packet = {
+            data: {
+                'username': `${user}`
+            }
+        }
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+    }
+
     useEffect(() => {
         const datafetch = () => {
             fetch('http://localhost:8429/retrieveRequest', {credentials: 'include'})
@@ -267,7 +301,10 @@ export default function HomeScreen() {
                                         flexDirection: 'column',
                                         width: '100%',
                                     }}>
-                                    {usersList.map((user, index) => (
+                                    {usersList.map((user, index) => {
+                                    const isRequested = requestList.includes(user);
+                                    
+                                    return (
                                         <View 
                                         style={{
                                             borderBottomWidth: 1.5,
@@ -289,13 +326,24 @@ export default function HomeScreen() {
                                         style={{
                                             display: user == ''? 'none' : 'flex'
                                         }}>
-                                            <Pressable
-                                                onPress={() => sendFriendRequest(user)}>
-                                                <IconSymbol size={20} name="person.badge.plus" color={'black'} />
-                                            </Pressable>
                                         </Text>
+                                            {isRequested !== true && (
+                                            <Pressable onPress={() => sendFriendRequest(user)}>
+                                                <IconSymbol size={20} name="person.badge.plus" color="black" />
+                                            </Pressable>
+                                            )}
+                                            {isRequested == true && (
+                                            <Pressable onPress={() => acceptFriendRequest(user)}>
+                                                <IconSymbol size={20} name="person.badge.plus" color="green" />
+                                            </Pressable>
+                                            )}
+                                            {isRequested == true && (
+                                            <Pressable onPress={() => declineFriendRequest(user)}>
+                                                <IconSymbol size={20} name="person.badge.plus" color="red" />
+                                            </Pressable>
+                                            )}
                                         </View>
-                                    ))}
+                                    )})}
                                     </View>
                                 </View>
                             </Text>
