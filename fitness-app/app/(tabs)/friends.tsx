@@ -303,7 +303,10 @@ export default function HomeScreen() {
                                     }}>
                                     {usersList.map((user, index) => {
                                     const isRequested = requestList.includes(user);
-                                    const isFriend = friendsList.includes(String(user).trim()) 
+                                    let rawUser = user;
+                                    rawUser = '\"' + rawUser + '\"'; // friendList has "(user)", fix user to match it for accurate comparison
+
+                                    const isFriend = friendsList.includes(rawUser);
 
                                     if (isFriend) return null;
                                     
