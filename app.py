@@ -173,7 +173,7 @@ def requestFriend():
     req = request.get_json()
     username = req['data']['username']
     print(username)
-    database.getRequest(database.get_userid(username), True, False, database.get_username(user_id))
+    ifWork = database.getRequest(database.get_userid(username), True, False, database.get_username(user_id))
 
     #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
     #SOCKET CODE
@@ -189,16 +189,25 @@ def addFriend():
     req = request.get_json()
     username = req['data']['username']
     friendsList = database.get_friendsList(user_id) # ideally returns a string with a list inside
+    sentList = database.get_friendsList(database.get_userid(username))
     try:
         friendList = json.loads(friendsList[0][0]) 
     except:
         friendList = friendsList
         print("no need for json load")
         pass
+    try:
+        sentsList = json.loads(sentList[0][0]) 
+    except:
+        sentsList = sentList
+        print("no need for json load")
+        pass
     friendList.append(username)
+    sentsList.append(database.get_username(user_id))
     database.update_accountInfo_friendsList(json.dumps(friendList),user_id)
+    database.update_accountInfo_friendsList(json.dumps(sentsList), database.get_userid(username))
 
-    database.getRequest(user_id, True, True, username)
+    database.getRequest(user_id, True, True, username) # remove user from request, 3rd True indicates removal
 
     return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
 

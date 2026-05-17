@@ -303,6 +303,7 @@ export default function HomeScreen() {
                                     }}>
                                     {usersList.map((user, index) => {
                                     const isRequested = requestList.includes(user);
+                                    const isFriend = friendsList.includes(user);
                                     
                                     return (
                                         <View 
@@ -327,17 +328,17 @@ export default function HomeScreen() {
                                             display: user == ''? 'none' : 'flex'
                                         }}>
                                         </Text>
-                                            {isRequested !== true && (
+                                            {isRequested !== true && isFriend !== true && (
                                             <Pressable onPress={() => sendFriendRequest(user)}>
                                                 <IconSymbol size={20} name="person.badge.plus" color="black" />
                                             </Pressable>
                                             )}
-                                            {isRequested == true && (
+                                            {isRequested == true && isFriend !== true && (
                                             <Pressable onPress={() => acceptFriendRequest(user)}>
                                                 <IconSymbol size={20} name="person.badge.plus" color="green" />
                                             </Pressable>
                                             )}
-                                            {isRequested == true && (
+                                            {isRequested == true && isFriend !== true && (
                                             <Pressable onPress={() => declineFriendRequest(user)}>
                                                 <IconSymbol size={20} name="person.badge.plus" color="red" />
                                             </Pressable>

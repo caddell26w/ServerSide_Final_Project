@@ -218,9 +218,9 @@ def get_friendsList(userid: int) -> str:
     cursor = __db.cursor()
     for row in cursor.execute(table_query, (userid,)):
         friendsList = row[0]
-        if friendsList is None:
+        if friendsList is None or friendsList == "[]":
             return []
-        return friendsList
+        return json.loads(friendsList[0][0]) 
 
 def getRequest(userid: int,sendFlag: bool, removeFlag: bool = False,username:str = ""):
     getRequests = '''SELECT requests from friendRequest
@@ -230,16 +230,19 @@ def getRequest(userid: int,sendFlag: bool, removeFlag: bool = False,username:str
     requestList = cursor.execute(getRequests,(userid,)).fetchall()
     if sendFlag == False:
         try:
+            # return back the list itself-- which we can just then pass to the frontend
             return json.loads(requestList[0][0])
         except: 
             print("RETURN NOT WORK")
             return []
     try:
         requestList2 = json.loads(requestList[0][0])
-        if username != "" and removeFlag != True:
-            requestList2.append(username)
-        elif username != "" and removeFlag == True:
-            requestList2.remove(username)
+        if username != "" and removeFlag != True: #checking if we want to add, and the username is included
+            if username not in requestList2:
+                requestList2.append(username)
+        elif username != "" and removeFlag == True: 
+            if username in requestList2:
+                requestList2.remove(username)
         sendList = json.dumps(requestList2)
     except:
         print("list not exist")
