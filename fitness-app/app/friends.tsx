@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, Platform, View, StatusBar, TouchableHighlight, Alert, TextInput } from 'react-native';
 
-const url = 'http://192.168.0.108:8429';
+const url = 'http://localhost:8429';
 
 export default function Friends() {
 
