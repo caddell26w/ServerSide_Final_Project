@@ -104,6 +104,8 @@ export default function HomeScreen() {
             
     }, [])
 
+    
+
     useEffect(() => {
         fetch('http://localhost:8429/activeFriends', {credentials: 'include'})
         .then((response) => response.json())

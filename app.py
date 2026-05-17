@@ -187,6 +187,7 @@ def getRequest():
         return user_id
     
     requestList = database.getRequest(user_id, False)
+    print(requestList)
 
     #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
     #SOCKET CODE
