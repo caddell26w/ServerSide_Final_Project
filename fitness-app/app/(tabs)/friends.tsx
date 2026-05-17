@@ -301,9 +301,11 @@ export default function HomeScreen() {
                                         flexDirection: 'column',
                                         width: '100%',
                                     }}>
-                                    {requestList.map((user, index) => {
+                                    {usersList.map((user, index) => {
                                     const isRequested = requestList.includes(user);
+                                    const isFriend = friendsList.includes(String(user).trim()) 
 
+                                    if (isFriend) return null;
                                     
                                     return (
                                         <View 
@@ -315,7 +317,7 @@ export default function HomeScreen() {
                                             width: '100%',
                                             flexDirection: 'row'
                                         }}>
-                                        {(<Text
+                                        {!isFriend && (<Text
                                         key={index}
                                         style={{
                                             fontSize: Platform.OS === 'web'? 14 : 7,
@@ -328,17 +330,17 @@ export default function HomeScreen() {
                                             display: user == ''? 'none' : 'flex'
                                         }}>
                                         </Text>
-                                            {!isRequested && (
+                                            {!isRequested && !isFriend && (
                                             <Pressable onPress={() => sendFriendRequest(user)}>
                                                 <IconSymbol size={20} name="person.badge.plus" color="black" />
                                             </Pressable>
                                             )}
-                                            {isRequested && (
+                                            {isRequested && !isFriend && (
                                             <Pressable onPress={() => acceptFriendRequest(user)}>
                                                 <IconSymbol size={20} name="person.badge.plus" color="green" />
                                             </Pressable>
                                             )}
-                                            {isRequested && (
+                                            {isRequested && !isFriend && (
                                             <Pressable onPress={() => declineFriendRequest(user)}>
                                                 <IconSymbol size={20} name="person.badge.plus" color="red" />
                                             </Pressable>
