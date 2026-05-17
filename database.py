@@ -1,4 +1,4 @@
-import sqlite3, string, random, hashlib
+import sqlite3, string, random, hashlib,os
 
 def database_init():
     __db = sqlite3.connect("fitness-app.db")
@@ -39,7 +39,7 @@ def user_register( username: str, password: str):
         characters = string.ascii_letters + string.digits + string.punctuation
         salt = ''.join(random.choice(characters) for i in range(length))
         return salt
-    salt = generate_salt(10)
+    salt = os.urandom(10)
     salted_password = salt.encode('utf-8') + password.encode('utf-8')
     hash_object = hashlib.sha256(salted_password)
     hashed_password = hash_object.hexdigest()

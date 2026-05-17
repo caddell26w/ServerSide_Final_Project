@@ -169,6 +169,9 @@ def handleRequest():
     elif request.method == 'POST':
         req = request.get_json()
         friendUsername = req['friendUsername']
+        checkRequests = database.get_friendRequests(database.get_userid(friendUsername))
+        if str(user_id) in checkRequests:
+            return jsonify({'status' : 'ERROR', 'body': ''})
         database.add_friendRequest(user_id, friendUsername)
         return jsonify({'status' : 'SUCCESS', 'body': ''})
     else: 
