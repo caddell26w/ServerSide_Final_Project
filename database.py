@@ -104,7 +104,7 @@ def get_userid(username: str) -> int:
         return rowid
     
 def get_friendRequests(userid: int) -> list:
-    table_query = '''SELECT requesterid FROM friendRequests WHERE userid = ? AND status = 'pending'''
+    table_query = '''SELECT requesterid FROM friendRequests WHERE userid = ? AND status = 'pending' '''
     __db = sqlite3.connect("fitness-app.db")
     cursor = __db.cursor()
     friendRequests = []
