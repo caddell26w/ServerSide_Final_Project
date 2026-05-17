@@ -1,12 +1,10 @@
 import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView} from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { useWindowDimensions, TextInput} from 'react-native';
-import { useNavigation, useRouter } from 'expo-router';
+import { useWindowDimensions } from 'react-native';
+import { useNavigation } from 'expo-router';
 
 export default function HomeScreen() {
     const {width, height} = useWindowDimensions();
-    const router = useRouter()
 
     const navigation = useNavigation();
 
@@ -14,8 +12,6 @@ export default function HomeScreen() {
     const [profilePicture, setProfilePicture] = useState('')
     const [goals, setGoals] = useState([''])
     const [friendsList, setFriendsList] = useState([''])
-    const [goalActive, toggleGoalActive] = useState(false)
-    const [goalInput, setGoalInput] = useState('')
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -26,98 +22,21 @@ export default function HomeScreen() {
     }
 
 
-    /*
-    Input: the info needed to display
-    Output: None 
-    Purpose: Goals and Friends are lists, python returns list, so we need to transform to typescript array
-    */
     function setDataValues(userValue:string, profilePictureValue:string, goalsValue:string[], friendsListValue:string[]) {
         setUser(userValue)
         setProfilePicture(profilePictureValue)
-        goalsValue = goalsValue.toString().replace("[", "").replace("]", "").replace(" ", "").replaceAll("'", "").split(",")
+        goalsValue = goalsValue.toString().replace("[", "").replace("]", "").replace(" ", "").replace("'", "").split(",")
         let goalList = []
         for (let goal of goalsValue) {
             goalList.push(goal)
         }
         setGoals(goalList)
-        friendsListValue = friendsListValue.toString().replace("[", "").replace("]", "").replace(" ", "").replaceAll("'", "").split(",")
+        friendsListValue = friendsListValue.toString().replace("[", "").replace("]", "").replace(" ", "").replace("'", "").split(",")
         let friendList = []
         for (let friend of friendsListValue) {
             friendList.push(friend)
         }
         setFriendsList(friendList)
-    }
-
-    async function deleteAccount() {
-        let url = 'http://localhost:8429/delete'
-        let packet = {
-            action: 'LOGIN',
-            data: {
-                'username':`${user}`,
-            }
-        }
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body: JSON.stringify(packet),
-            credentials: 'include',
-        }).then((resp) => {return resp.json()})
-        .then((json) => {
-            if (json.message === 'success'){
-            
-            router.navigate("../login")
-            }
-        })
-        
-    }
-
-    async function setNewGoal(goal:string) {
-        let url = 'http://localhost:8429/addGoal'
-        let packet = {
-            action: 'LOGIN',
-            data: {
-                'goal':`${goal}`,
-            }
-        }
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body: JSON.stringify(packet),
-            credentials: 'include',
-        }).then((resp) => {return resp.json()})
-        .then((json) => {
-            if (json.status === 'SUCCESS') {
-                
-            }
-        })
-    }
-
-    async function updatePassword(oldPassword:string, newPassword:string) {
-        let url = 'http://localhost:8429/updatePassword'
-        let packet = {
-            action: 'LOGIN',
-            data: {
-                'oldPassword':`${oldPassword}`,
-                'newPassword': `${newPassword}`
-            }
-        }
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body: JSON.stringify(packet),
-            credentials: 'include',
-        }).then((resp) => {return resp.json()})
-        .then((json) => {
-            if (json.status === 'SUCCESS') {
-                
-            }
-        })
     }
 
     function displayGoals() {
@@ -133,17 +52,15 @@ export default function HomeScreen() {
     }
 
     useEffect(() => {
-        fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
+        fetch('http://127.0.0.1:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList)}})
         .catch((error) => {
             console.error('Error:', error)
             navigation.getParent()?.navigate('index')
         })
-
-
         
-    }, [goals])
+    }, [])
 
     return (
         <View
@@ -231,36 +148,13 @@ export default function HomeScreen() {
                     Update password
                 </Text>
             </Pressable>
-            <Pressable
-            onPress={() => toggleGoalActive(true)}>
+            <Pressable>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Add new goal
                 </Text>
             </Pressable>
-            <TextInput 
-                style={[{display: goalActive? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
-                placeholder='Enter a fitness goal'
-                placeholderTextColor={'#D2B80F'}
-                value={goalInput}
-                onChangeText={NewText => setGoalInput(NewText)}
-                >
-            </TextInput>
-            <Pressable
-                style={[{display: goalActive? 'flex' : 'none'}]}
-                onPress={() => {
-                    setNewGoal(goalInput) 
-                    toggleGoalActive(false)
-                }
-                }
-                >
-                <Text
-                style={[{margin: 8}, styles.changeButtons]}>
-                    Submit new goal
-                </Text>
-            </Pressable>
-            <Pressable
-                onPress={() => deleteAccount()}>
+            <Pressable>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Delete account

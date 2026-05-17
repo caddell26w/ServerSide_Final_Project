@@ -4,14 +4,11 @@ from datetime import date
 import database
 import redis
 import uuid
-import time
 import json
-from flask_socketio import join_room, leave_room, emit, SocketIO
 
 app = Flask(__name__)
-socketio = SocketIO(app)
 app.secret_key = 'supersecret'
-CORS(app, supports_credentials='true', origins=['http://localhost:8081', 'https://localhost', 'https://localhost:443'])
+CORS(app, supports_credentials=True)
 database.database_init()
 
 R_Server = redis.StrictRedis()
@@ -28,7 +25,6 @@ def index():
 
 @app.route("/getUser", methods=['GET'])
 def getUser():
-    time.sleep(0.5)
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
@@ -62,7 +58,7 @@ def register():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='None', secure=True)
+        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
         return(res)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
@@ -88,10 +84,8 @@ def login():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='None', secure=True)
+        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
         return(res)
-    else:
-        print("Incorrect Password!")
 
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
@@ -128,7 +122,6 @@ def accountSettings():
     if type(user_id) != int:
         return user_id
 
-    # uses database to send client the info to be displayed
     if request.method == 'GET':
         user = database.get_username(user_id)
         accountInfo = database.get_accountInfo(user_id)
@@ -163,131 +156,50 @@ def activeFriends():
             activeFriendsList.append(session_user)
     return(jsonify({'status': 'SUCCESS', 'body' : {'activeFriendsList' : activeFriendsList, 'usersList' : usersList}}))
 
-@app.route("/requestFriend", methods=['PUT'])
-def requestFriend():
+@app.route("/request", methods=['GET','POST'])
+def handleRequest():
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
-    
-    req = request.get_json()
-    username = req['data']['username']
-    print(username)
-    ifWork = database.getRequest(database.get_userid(username), True, False, database.get_username(user_id))
 
-    #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
-    #SOCKET CODE
-    return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
-
-@app.route("/addFriend", methods=['PUT'])
-def addFriend():
-    token = request.cookies.get('session_id')
-    user_id = getUserid(token)
-    if type(user_id) != int:
-        return user_id
-    
-    req = request.get_json()
-    username = req['data']['username']
-    friendsList = database.get_friendsList(user_id) # ideally returns a string with a list inside
-    sentList = database.get_friendsList(database.get_userid(username))
-    try:
-        friendList = json.loads(friendsList[0][0]) 
-    except:
-        friendList = friendsList
-        print("no need for json load")
-        pass
-    try:
-        sentsList = json.loads(sentList[0][0]) 
-    except:
-        sentsList = sentList
-        print("no need for json load")
-        pass
-    if (username in friendList or username in sentsList) == False:
-        friendList.append(username)
-        sentsList.append(database.get_username(user_id))
-    database.update_accountInfo_friendsList(json.dumps(friendList),user_id)
-    database.update_accountInfo_friendsList(json.dumps(sentsList), database.get_userid(username))
-
-    database.getRequest(user_id, True, True, username) # remove user from request, 3rd True indicates removal
-
-    return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
-
-@app.route("/rejectFriend", methods=['PUT'])
-def rejectFriend():
-    token = request.cookies.get('session_id')
-    user_id = getUserid(token)
-    if type(user_id) != int:
-        return user_id
-    
-    req = request.get_json()
-    username = req['data']['username']
-    database.getRequest(user_id, True, True, username)
-
-    return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
-
-@app.route("/retrieveRequest", methods=['GET'])
-def getRequest():
-    token = request.cookies.get('session_id')
-    user_id = getUserid(token)
-    if type(user_id) != int:
-        return user_id
-    
-    requestList = database.getRequest(user_id, False)
-
-    #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
-    #SOCKET CODE
-    return(jsonify({'status': 'SUCCESS', 'body':requestList}))
-
-@app.route("/addGoal", methods=['GET','PUT'])
-def addGoal():
-    token = request.cookies.get('session_id')
-    user_id = getUserid(token)
-    if type(user_id) != int:
-        return user_id
-    
-    print("\nGOALS")
-    goalList = database.get_goals(user_id) # returns string of the list
-    try:
-        editGoalList = json.loads(goalList[0][0]) # grabs the list inside the string, then turn it to a python list
-    except:
-        editGoalList = []
-        print("no need for json load")
-        pass
     if request.method == 'GET':
-        return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
-    
-    editGoalList.append((request.get_json())['data']['goal']) # add user goal to list
-    print(f"EDIT GOAL:{editGoalList}")
-    database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
-    return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
+        friendRequests = database.get_friendRequests(user_id)
+        return jsonify({'status' : 'SUCCESS', 'body': {'friendRequests' : friendRequests}})
+    elif request.method == 'POST':
+        req = request.get_json()
+        friendUsername = req['friendUsername']
+        database.add_friendRequest(user_id, friendUsername)
+        return jsonify({'status' : 'SUCCESS', 'body': ''})
+    else: 
+        return jsonify({'status' : 'ERROR', 'body': ''})
 
-@app.route("/delete", methods=['DELETE'])
-def deleteAccount():
+@app.route("/respondRequest", methods=['POST'])
+def respondRequest():
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
-    
+
     req = request.get_json()
-    reqdata = req['data']
-    userName = reqdata['username']
-    reqId = database.get_userid(userName)
+    requesterId = req['requesterId']
+    response = req['response']
+    database.respond_friendRequest(user_id, requesterId, response)
+    return jsonify({'status' : 'SUCCESS', 'body': ''})
 
-    if reqId == user_id:
+@app.route("/friends", methods=['GET'])
+def friends():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    friendsIDs = database.get_friendsList(user_id)
+    friendsList = []
+    for friendID in friendsIDs:
+        friendUsername = database.get_username(friendID)
+        friendsList.append({"friendID": friendID, "username": friendUsername})
+    return jsonify({'status' : 'SUCCESS', 'body' : {'friendsList' : friendsList}})
 
-        database.delete_user(user_id)
-        if token:
-            res = make_response(jsonify({'message': 'success'}))
-            res.delete_cookie('session_id')
-            return(res)
-        
-    return jsonify({'status' : 'error', 'body': 'no_cookie'})
-
-"""
-Input: token from the cookie
-Output: user_id according to cookie
-Purpose: get the user_id for verification according to the page we're on
-"""
 def getUserid(token:str):
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
@@ -298,6 +210,5 @@ def getUserid(token:str):
     ids = json.loads(stored_ids)
     user_id = ids["user_id"]
     return user_id
-
 
 app.run(host='0.0.0.0', port=8429, debug=True)

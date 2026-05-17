@@ -18,7 +18,11 @@ export default function LoginScreen() {
 
     // retrieves data from app.py
     async function login() {
+<<<<<<< HEAD
         let url = 'http://localhost:8429/login'
+=======
+        let url = 'http://192.168.0.108:8429/login'
+>>>>>>> ca1385482371ace33ad7dc3024b6b54d57bc073b
         let packet = {
             action: 'LOGIN',
             data: {

@@ -1,4 +1,4 @@
-import sqlite3, string, random, hashlib, json,os
+import sqlite3, string, random, hashlib
 
 def database_init():
     __db = sqlite3.connect("fitness-app.db")
@@ -20,26 +20,27 @@ def database_init():
                         thursdayWorkout TEXT DEFAULT 'thurWorkout',
                         fridayWorkout TEXT DEFAULT 'friWorkout',
                         saturdayWorkout TEXT DEFAULT 'satWorkout')'''
-    table_friendRequest = '''CREATE TABLE IF NOT EXISTS friendRequest
-                            (userid INT NOT NULL,
-                            requests TEXT DEFAULT '')'''
+    table_friends = '''CREATE TABLE IF NOT EXISTS friends
+                        (userid INT NOT NULL,
+                        friendid INT NOT NULL)'''
+    table_friendRequests = '''CREATE TABLE IF NOT EXISTS friendRequests
+                        (userid INT NOT NULL,
+                        requesterid INT NOT NULL,
+                        status TEXT NOT NULL)'''
     __db.execute(table_accounts)
     __db.execute(table_accountInfo)
     __db.execute(table_workoutPlan)
-    __db.execute(table_friendRequest)
+    __db.execute(table_friends)
+    __db.execute(table_friendRequests)
     __db.commit()
 
-"""
-Input: password and username
-Purpose: store user's info securely in the database
-"""
 def user_register( username: str, password: str):
     def generate_salt(length: int) -> str:
         characters = string.ascii_letters + string.digits + string.punctuation
         salt = ''.join(random.choice(characters) for i in range(length))
         return salt
-    salt = os.urandom(10).hex() # os.urandom allows more secure salts
-    salted_password = (str(salt) + password).encode('utf-8')
+    salt = generate_salt(10)
+    salted_password = salt.encode('utf-8') + password.encode('utf-8')
     hash_object = hashlib.sha256(salted_password)
     hashed_password = hash_object.hexdigest()
 
@@ -60,18 +61,10 @@ def user_register( username: str, password: str):
     create_workoutPlan = '''INSERT INTO workoutPlan
                             (userid) VALUES
                             (?)'''
-    create_friendRequest = '''INSERT INTO friendRequest
-                            (userid) VALUES
-                            (?)'''
     __db.execute(create_accountInfo, (userid,))
     __db.execute(create_workoutPlan, (userid,))
-    __db.execute(create_friendRequest, (userid,))
     __db.commit()
 
-"""
-Input: the username the user entered into the register
-Purpose: Ensure unique username to prevent confusion
-"""
 def username_check(username: str) -> bool:
     table_query = '''SELECT * from accounts
                         WHERE username = ?'''
@@ -84,10 +77,6 @@ def username_check(username: str) -> bool:
     else:
         return True
 
-"""
-Input: what the user entered for login and password
-Purpose: Ensure the user had the correct login and password to prevent identity theft
-"""
 def check_login(username: str, password: str) -> bool:
     table_query = '''SELECT * from accounts
                      WHERE username = ?'''
@@ -96,7 +85,7 @@ def check_login(username: str, password: str) -> bool:
     for user in cursor.execute(table_query, (username,)):
         stored_hashed_password = user[1]
         salt = user[2]
-        salted_password = (str(salt)+password).encode('utf-8')
+        salted_password = salt.encode('utf-8') + password.encode('utf-8')
         hash_object = hashlib.sha256(salted_password)
         new_hashed_password = hash_object.hexdigest()
         if stored_hashed_password == new_hashed_password:
@@ -105,10 +94,6 @@ def check_login(username: str, password: str) -> bool:
             return False
     return False
 
-"""
-Input: username
-Purpose: Get the id associated with the username
-"""
 def get_userid(username: str) -> int:
     table_query = '''SELECT rowid from accounts
                      WHERE username = ?'''
@@ -117,11 +102,42 @@ def get_userid(username: str) -> int:
     for row in cursor.execute(table_query, (username,)):
         rowid = row[0]
         return rowid
+    
+def get_friendRequests(userid: int) -> list:
+    table_query = '''SELECT requesterid FROM friendRequests WHERE userid = ? AND status = 'pending'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+    friendRequests = []
+    for row in cursor.execute(table_query, (userid,)):
+        friendRequests.append({
+        'requesterId': row[0],
+        'requesterUsername': get_username(row[0])
+        })
+    return friendRequests
 
-"""
-Input: userid
-Purpose: Get the username associated with the id
-"""
+def respond_friendRequest(user_id: int, requesterId: int, response: str):
+    update_request = '''UPDATE friendRequests
+                        SET status = ?
+                        WHERE userid = ? AND requesterid = ?'''
+    __db = sqlite3.connect("fitness-app.db")
+    __db.execute(update_request, (response, user_id, requesterId))
+    if response == 'ACCEPT':
+        add_friend = '''INSERT INTO friends
+                        (userid, friendid) VALUES
+                        (?, ?)'''
+        __db.execute(add_friend, (user_id, requesterId))
+        __db.execute(add_friend, (requesterId, user_id))
+    __db.commit()
+
+def get_friendsList(userid: int) -> list:
+    table_query = '''SELECT friendid FROM friends WHERE userid = ?'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+    friendsList = []
+    for row in cursor.execute(table_query, (userid,)):
+        friendsList.append(row[0])
+    return friendsList
+
 def get_username(userid: int) -> str:
     table_query = '''SELECT username from accounts
                      WHERE rowid = ?'''
@@ -131,11 +147,6 @@ def get_username(userid: int) -> str:
         username = row[0]
         return username
 
-"""
-Input: passwords and userid
-Output: whether it worked or not
-Purpose: Ensure security by ensuring hashing/salting and verification
-"""
 def get_users() -> str:
     table_query = '''SELECT username from accounts'''
     __db = sqlite3.connect("fitness-app.db")
@@ -145,6 +156,14 @@ def get_users() -> str:
         userList.append(row[0])
     return userList
 
+def add_friendRequest(user_id: int, friendUsername: str):
+    friend_id = get_userid(friendUsername)
+    insert_request = '''INSERT INTO friendRequests
+                        (userid, requesterid, status) VALUES
+                        (?, ?, 'pending')'''
+    __db = sqlite3.connect("fitness-app.db")
+    __db.execute(insert_request, (friend_id, user_id))
+    __db.commit()
 
 def update_password(currentPassword: str, newPassword: str, userid: int) -> bool:
     table_query = '''SELECT * from accounts
@@ -162,16 +181,12 @@ def update_password(currentPassword: str, newPassword: str, userid: int) -> bool
         new_hash_object = hashlib.sha256(salted_new_password)
         new_hashed_password = new_hash_object.hexdigest()
     update_account = '''UPDATE accounts
-                     SET password = ?,
+                     SET password = ?
                      WHERE rowid = ?'''
     __db.execute(update_account, (new_hashed_password, userid))
     __db.commit()
     return True
 
-"""
-Input: workout plan according to user input
-Purpose: Update database of the user's workout plan according to userid
-"""
 def update_workoutPlan(sundayWorkout: str, mondayWorkout: str, tuesdayWorkout: str, wednesdayWorkout: str, thursdayWorkout: str, fridayWorkout: str, saturdayWorkout: str, userid: int):
     update_workoutPlan = '''UPDATE workoutPlan
                             SET sundayWorkout = ?,
@@ -185,15 +200,6 @@ def update_workoutPlan(sundayWorkout: str, mondayWorkout: str, tuesdayWorkout: s
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(update_workoutPlan, (sundayWorkout, mondayWorkout, tuesdayWorkout, wednesdayWorkout, thursdayWorkout, fridayWorkout, saturdayWorkout, userid))
     __db.commit()
-
-def get_goals(userid: int):
-    getGoal = '''SELECT goals from accountInfo where userid = ?'''
-    __db = sqlite3.connect("fitness-app.db")
-    cursor = __db.cursor()
-
-    goal = cursor.execute(getGoal, (userid,)).fetchall()
-    return goal
-    
 
 def update_accountInfo_goals(goals: str, userid: int):
     update_accountInfo = '''UPDATE accountInfo
@@ -219,52 +225,6 @@ def get_accountInfo(userid: int) -> dict:
     for row in cursor.execute(table_query, (userid,)):
         accountInfo = {'userid': row[0], 'profilePicture': row[1], 'goals': row[2], 'friendsList': row[3]}
         return accountInfo
-
-def get_friendsList(userid: int) -> str:
-    table_query = '''SELECT friendsList from accountInfo
-                     WHERE userid = ?'''
-    __db = sqlite3.connect("fitness-app.db")
-    cursor = __db.cursor()
-    for row in cursor.execute(table_query, (userid,)):
-        friendsList = row[0]
-        if friendsList is None or friendsList == "[]":
-            return []
-        print(friendsList)
-        return json.loads(friendsList) 
-
-def getRequest(userid: int,sendFlag: bool, removeFlag: bool = False,username:str = ""):
-    getRequests = '''SELECT requests from friendRequest
-                    WHERE userid = ?'''
-    __db = sqlite3.connect("fitness-app.db")
-    cursor = __db.cursor()
-    requestList = cursor.execute(getRequests,(userid,)).fetchall()
-    if sendFlag == False:
-        try:
-            # return back the list itself-- which we can just then pass to the frontend
-            return json.loads(requestList[0][0])
-        except: 
-            print("RETURN NOT WORK")
-            return []
-    try:
-        requestList2 = json.loads(requestList[0][0])
-        if username != "" and removeFlag != True: #checking if we want to add, and the username is included
-            if username not in requestList2:
-                requestList2.append(username)
-        elif username != "" and removeFlag == True: 
-            if username in requestList2:
-                requestList2.remove(username)
-        sendList = json.dumps(requestList2)
-    except:
-        print("list not exist")
-        list = [username]
-        sendList = json.dumps(list)
-    
-    updateRequest = '''UPDATE friendRequest
-                        SET requests = ?
-                        where userid = ?'''
-    __db.execute(updateRequest,(sendList,userid))
-    __db.commit()
-
 
 def get_workoutPlan(userid: int) -> dict:
     table_query = '''SELECT * from workoutPlan
@@ -292,13 +252,10 @@ def delete_user(userid: int):
                             WHERE userid = ?'''
     delete_workoutPlan = '''DELETE FROM workoutPlan
                             WHERE userid = ?'''
-    delete_friendRequest='''DELETE FROM friendRequest
-                        where userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(delete_account, (userid,))
     __db.execute(delete_accountInfo, (userid,))
     __db.execute(delete_workoutPlan, (userid,))
-    __db.execute(delete_friendRequest, (userid,))
     __db.commit()
 
 if __name__ == '__main__':
