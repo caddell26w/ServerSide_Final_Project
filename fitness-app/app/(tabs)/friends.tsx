@@ -132,7 +132,7 @@ export default function HomeScreen() {
         datafetch()
 
         // run every 5 seconds to check for any friend requests
-        const interval = setInterval(datafetch, 5000)
+        const interval = setInterval(datafetch, 2000)
         return () => clearInterval(interval)
             
             

@@ -202,8 +202,9 @@ def addFriend():
         sentsList = sentList
         print("no need for json load")
         pass
-    friendList.append(username)
-    sentsList.append(database.get_username(user_id))
+    if (username in friendList or username in sentsList) == False:
+        friendList.append(username)
+        sentsList.append(database.get_username(user_id))
     database.update_accountInfo_friendsList(json.dumps(friendList),user_id)
     database.update_accountInfo_friendsList(json.dumps(sentsList), database.get_userid(username))
 
