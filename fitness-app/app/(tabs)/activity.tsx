@@ -49,8 +49,17 @@ export default function Activity() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0b2f42',
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
+  acDcTxt: {
+    color: '#D2B80F',
+    marginVertical: 2,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontWeight: '400',
+    fontSize: Platform.OS === 'web'? 18 : 9,
+    textAlign: 'center'
+  }
+  
 
 });
