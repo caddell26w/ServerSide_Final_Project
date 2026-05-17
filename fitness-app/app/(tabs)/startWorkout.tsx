@@ -113,7 +113,7 @@ export default function startWorkout() {
             console.error('Error:', error)
             navigation.getParent()?.navigate('index')
         })
-    })
+    }, [])
 
     return (
         <View

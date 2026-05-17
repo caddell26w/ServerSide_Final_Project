@@ -27,6 +27,7 @@ export default function HomeScreen() {
         width: Platform.OS === 'web' ? 0.400 * width : 0.35 * width
     }
 
+    // if time, handle this with json.loads and json.dumps but for now leave it to save time
     function setDataValues(userValue:string, profilePictureValue:string, friendsListValue:string[]) {
         setUser(userValue)
         setProfilePicture(profilePictureValue)

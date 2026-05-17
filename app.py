@@ -233,12 +233,33 @@ def getRequest():
         return user_id
     
     requestList = database.getRequest(user_id, False)
-    print(requestList)
 
     #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
     #SOCKET CODE
     return(jsonify({'status': 'SUCCESS', 'body':requestList}))
 
+@app.route("/addGoal", methods=['GET','PUT'])
+def addGoal():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    print("\nGOALS")
+    goalList = database.get_goals(user_id) # returns string of the list
+    try:
+        editGoalList = json.loads(goalList[0][0]) # grabs the list inside the string, then turn it to a python list
+    except:
+        editGoalList = []
+        print("no need for json load")
+        pass
+    if request.method == 'GET':
+        return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
+    
+    editGoalList.append((request.get_json())['data']['goal']) # add user goal to list
+    print(f"EDIT GOAL:{editGoalList}")
+    database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
+    return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
 
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():

@@ -186,6 +186,15 @@ def update_workoutPlan(sundayWorkout: str, mondayWorkout: str, tuesdayWorkout: s
     __db.execute(update_workoutPlan, (sundayWorkout, mondayWorkout, tuesdayWorkout, wednesdayWorkout, thursdayWorkout, fridayWorkout, saturdayWorkout, userid))
     __db.commit()
 
+def get_goals(userid: int):
+    getGoal = '''SELECT goals from accountInfo where userid = ?'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+
+    goal = cursor.execute(getGoal, (userid,)).fetchall()
+    return goal
+    
+
 def update_accountInfo_goals(goals: str, userid: int):
     update_accountInfo = '''UPDATE accountInfo
                             SET goals = ?

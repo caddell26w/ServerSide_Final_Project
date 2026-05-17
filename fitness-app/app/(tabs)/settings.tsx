@@ -1,7 +1,7 @@
 import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions, TextInput} from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 
 export default function HomeScreen() {
@@ -14,6 +14,8 @@ export default function HomeScreen() {
     const [profilePicture, setProfilePicture] = useState('')
     const [goals, setGoals] = useState([''])
     const [friendsList, setFriendsList] = useState([''])
+    const [goalActive, toggleGoalActive] = useState(false)
+    const [goalInput, setGoalInput] = useState('')
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -71,6 +73,29 @@ export default function HomeScreen() {
         
     }
 
+    async function setNewGoal(goal:string) {
+        let url = 'http://localhost:8429/addGoal'
+        let packet = {
+            action: 'LOGIN',
+            data: {
+                'goal':`${goal}`,
+            }
+        }
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {
+            if (json.status === 'SUCCESS') {
+                
+            }
+        })
+    }
+
     function displayGoals() {
         let goalString = ''
         for (let goal of goals) {
@@ -91,8 +116,10 @@ export default function HomeScreen() {
             console.error('Error:', error)
             navigation.getParent()?.navigate('index')
         })
+
+
         
-    })
+    }, [goals])
 
     return (
         <View
@@ -180,10 +207,32 @@ export default function HomeScreen() {
                     Update password
                 </Text>
             </Pressable>
-            <Pressable>
+            <Pressable
+            onPress={() => toggleGoalActive(true)}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Add new goal
+                </Text>
+            </Pressable>
+            <TextInput 
+                style={[{display: goalActive? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                placeholder='Enter a fitness goal'
+                placeholderTextColor={'#D2B80F'}
+                value={goalInput}
+                onChangeText={NewText => setGoalInput(NewText)}
+                >
+            </TextInput>
+            <Pressable
+                style={[{display: goalActive? 'flex' : 'none'}]}
+                onPress={() => {
+                    setNewGoal(goalInput) 
+                    toggleGoalActive(false)
+                }
+                }
+                >
+                <Text
+                style={[{margin: 8}, styles.changeButtons]}>
+                    Submit new goal
                 </Text>
             </Pressable>
             <Pressable
