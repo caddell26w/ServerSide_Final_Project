@@ -15,7 +15,6 @@ export default function HomeScreen() {
 
     const [inactiveFriendsList, setInactiveFriendsList] = useState([''])
     const [activeFriendsList, setActiveFriendsList] = useState([''])
-    const [requestList , setRequestList] = useState([''])
     const [usersList, setUsersList] = useState([''])
 
 
@@ -27,7 +26,6 @@ export default function HomeScreen() {
         width: Platform.OS === 'web' ? 0.400 * width : 0.35 * width
     }
 
-    // if time, handle this with json.loads and json.dumps but for now leave it to save time
     function setDataValues(userValue:string, profilePictureValue:string, friendsListValue:string[]) {
         setUser(userValue)
         setProfilePicture(profilePictureValue)
@@ -60,95 +58,18 @@ export default function HomeScreen() {
         setInactiveFriendsList(inactiveFriends)
     }
     
-    async function sendFriendRequest(user: string) {
-        let url = 'http://localhost:8429/requestFriend'
-        let packet = {
-            data: {
-                'username':`${user}`,
-            }
-        }
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body: JSON.stringify(packet),
-            credentials: 'include',
-        }).then((resp) => {return resp.json()})
-    }
-
-    async function acceptFriendRequest(user: string) {
-        let url = 'http://localhost:8429/addFriend'
-        let packet = {
-            data: {
-                'username': `${user}`
-            }
-        }
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body: JSON.stringify(packet),
-            credentials: 'include',
-        }).then((resp) => {return resp.json()})
-    }
-
-    async function declineFriendRequest(user :string) {
-        let url = 'http://localhost:8429/rejectFriend'
-        let packet = {
-            data: {
-                'username': `${user}`
-            }
-        }
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body: JSON.stringify(packet),
-            credentials: 'include',
-        }).then((resp) => {return resp.json()})
+    function sendFriendRequest(user: string) {
+        console.log(user)
     }
 
     useEffect(() => {
-        const datafetch = () => {
-            fetch('http://localhost:8429/retrieveRequest', {credentials: 'include'})
-            .then((response) => {
-                return response.json()
-                })
-            .then((json) => {
-            if (json.status === 'ERROR') {
-                throw json.body;
-            }
-                setRequestList(json.body);
-                console.log('request from', json.body);
-            })
-            .catch((error) => {
-                console.error('Error:', error)
-                navigation.getParent()?.navigate('index')
-            })
-        }
-
-        datafetch()
-
-        // run every 5 seconds to check for any friend requests
-        const interval = setInterval(datafetch, 2000)
-        return () => clearInterval(interval)
-            
-            
-    }, [])
-
-    
-
-    useEffect(() => {
-        fetch('http://localhost:8429/activeFriends', {credentials: 'include'})
+        fetch('http://127.0.0.1:8429/activeFriends', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): updateActiveUsers(json.body.activeFriendsList, json.body.usersList)}})
     }, [friendsList])
 
     useEffect(() => {
-            fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
+            fetch('http://127.0.0.1:8429/accountSettings', {credentials: 'include'})
             .then((response) => response.json())
             .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.friendsList)}})
             .catch((error) => {
@@ -302,16 +223,7 @@ export default function HomeScreen() {
                                         flexDirection: 'column',
                                         width: '100%',
                                     }}>
-                                    {usersList.map((user, index) => {
-                                    const isRequested = requestList.includes(user);
-                                    let rawUser = user;
-                                    rawUser = '\"' + rawUser + '\"'; // friendList has "(user)", fix user to match it for accurate comparison
-
-                                    const isFriend = friendsList.includes(rawUser);
-
-                                    if (isFriend) return null;
-                                    
-                                    return (
+                                    {usersList.map((user, index) => (
                                         <View 
                                         style={{
                                             borderBottomWidth: 1.5,
@@ -321,36 +233,25 @@ export default function HomeScreen() {
                                             width: '100%',
                                             flexDirection: 'row'
                                         }}>
-                                        {!isFriend && (<Text
+                                        <Text 
                                         key={index}
                                         style={{
                                             fontSize: Platform.OS === 'web'? 14 : 7,
                                             textAlign: 'left', 
                                             width: '100%'
                                         }}>
-                                        {user == ''? 'No Other Users' : user}</Text>)}
+                                        {user == ''? 'No Other Users' : user}</Text>
                                         <Text
                                         style={{
                                             display: user == ''? 'none' : 'flex'
                                         }}>
+                                            <Pressable
+                                                onPress={() => sendFriendRequest(user)}>
+                                                <IconSymbol size={20} name="person.badge.plus" color={'black'} />
+                                            </Pressable>
                                         </Text>
-                                            {!isRequested && !isFriend && (
-                                            <Pressable onPress={() => sendFriendRequest(user)}>
-                                                <IconSymbol size={20} name="person.badge.plus" color="black" />
-                                            </Pressable>
-                                            )}
-                                            {isRequested && !isFriend && (
-                                            <Pressable onPress={() => acceptFriendRequest(user)}>
-                                                <IconSymbol size={20} name="person.badge.plus" color="green" />
-                                            </Pressable>
-                                            )}
-                                            {isRequested && !isFriend && (
-                                            <Pressable onPress={() => declineFriendRequest(user)}>
-                                                <IconSymbol size={20} name="person.badge.plus" color="red" />
-                                            </Pressable>
-                                            )}
                                         </View>
-                                    )})}
+                                    ))}
                                     </View>
                                 </View>
                             </Text>
