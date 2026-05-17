@@ -220,7 +220,8 @@ def get_friendsList(userid: int) -> str:
         friendsList = row[0]
         if friendsList is None or friendsList == "[]":
             return []
-        return json.loads(friendsList[0][0]) 
+        print(friendsList)
+        return json.loads(friendsList) 
 
 def getRequest(userid: int,sendFlag: bool, removeFlag: bool = False,username:str = ""):
     getRequests = '''SELECT requests from friendRequest
