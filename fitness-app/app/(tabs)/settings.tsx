@@ -96,6 +96,30 @@ export default function HomeScreen() {
         })
     }
 
+    async function updatePassword(oldPassword:string, newPassword:string) {
+        let url = 'http://localhost:8429/updatePassword'
+        let packet = {
+            action: 'LOGIN',
+            data: {
+                'oldPassword':`${oldPassword}`,
+                'newPassword': `${newPassword}`
+            }
+        }
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {
+            if (json.status === 'SUCCESS') {
+                
+            }
+        })
+    }
+
     function displayGoals() {
         let goalString = ''
         for (let goal of goals) {
