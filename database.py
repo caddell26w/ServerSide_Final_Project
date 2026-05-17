@@ -218,6 +218,8 @@ def get_friendsList(userid: int) -> str:
     cursor = __db.cursor()
     for row in cursor.execute(table_query, (userid,)):
         friendsList = row[0]
+        if friendsList is None:
+            return []
         return friendsList
 
 def getRequest(userid: int,sendFlag: bool, removeFlag: bool = False,username:str = ""):

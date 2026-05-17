@@ -173,7 +173,7 @@ def requestFriend():
     req = request.get_json()
     username = req['data']['username']
     print(username)
-    database.getRequest(database.get_userid(username), True, database.get_username(user_id))
+    database.getRequest(database.get_userid(username), True, False, database.get_username(user_id))
 
     #socketio.emit('new_request', {'from': username}, to=f"room_{user_id}" )
     #SOCKET CODE
@@ -188,19 +188,22 @@ def addFriend():
     
     req = request.get_json()
     username = req['data']['username']
-    friendsList = database.get_friendsList() # ideally returns a string with a list inside
-    friendList = json.loads(friendsList[0][0]) 
-    if friendList is None:
-        friendList = [username]
-    else:
-        friendList.append(username)
+    friendsList = database.get_friendsList(user_id) # ideally returns a string with a list inside
+    try:
+        friendList = json.loads(friendsList[0][0]) 
+    except:
+        friendList = friendsList
+        print("no need for json load")
+        pass
+    friendList.append(username)
     database.update_accountInfo_friendsList(json.dumps(friendList),user_id)
-    database.getRequest(user_id, True, False, username)
+
+    database.getRequest(user_id, True, True, username)
 
     return(jsonify({'status': 'SUCCESS', 'body':'Return msg to avoid error'}))
 
 @app.route("/rejectFriend", methods=['PUT'])
-def addFriend():
+def rejectFriend():
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
