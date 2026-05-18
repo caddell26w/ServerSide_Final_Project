@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView} from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions, TextInput } from 'react-native';
 import { useNavigation } from 'expo-router';
 
 export default function HomeScreen() {
@@ -12,6 +12,8 @@ export default function HomeScreen() {
     const [profilePicture, setProfilePicture] = useState('')
     const [goals, setGoals] = useState([''])
     const [friendsList, setFriendsList] = useState([''])
+    const [goalActive, toggleGoalActive] = useState(false)
+    const [goalInput, setGoalInput] = useState('')
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -23,7 +25,7 @@ export default function HomeScreen() {
 
 
     function setDataValues(userValue:string, profilePictureValue:string, goalsValue:string[], friendsListValue:string[]) {
-        setUser(userValue)
+        setUser(userValue) // username, not userid
         setProfilePicture(profilePictureValue)
         goalsValue = goalsValue.toString().replace("[", "").replace("]", "").replace(" ", "").replace("'", "").split(",")
         let goalList = []
@@ -76,6 +78,26 @@ export default function HomeScreen() {
         
     }
 
+    async function addGoal(goal:string) {
+        let url = 'http://localhost:8429/addGoal'
+        let packet = {
+            action: 'GOAL',
+            data: {
+                'goal':`${goal}`,
+            }
+        }
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {setGoals(json.body)
+        })
+    }
+
     useEffect(() => {
         fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
@@ -85,7 +107,7 @@ export default function HomeScreen() {
             navigation.getParent()?.navigate('index')
         })
         
-    }, [])
+    }, [goalActive])
 
     return (
         <View
@@ -173,10 +195,39 @@ export default function HomeScreen() {
                     Update password
                 </Text>
             </Pressable>
-            <Pressable>
+            <Pressable
+            style={[{display: goalActive ? 'none' : 'flex'}]}
+            onPress={() => toggleGoalActive(true)}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Add new goal
+                </Text>
+            </Pressable>
+            <TextInput 
+                style={[styles.inputText,{display: goalActive? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                placeholder='Enter a fitness goal'
+                placeholderTextColor={'#D2B80F'}
+                value={goalInput}
+                onChangeText={NewText => setGoalInput(NewText)}
+                >
+            </TextInput>
+            <Pressable
+                style={[{display: goalActive? 'flex' : 'none'}]}
+                onPress={() => {
+                    addGoal(goalInput) 
+                    toggleGoalActive(false)
+                }
+                }
+                >
+                <Text
+                style={[{margin: 8}, styles.changeButtons]}>
+                    Submit new goal
+                </Text>
+            </Pressable>
+            <Pressable>
+                <Text
+                style={[{margin: 8}, styles.changeButtons, {display: goalActive ? 'none' : 'flex'}]}>
+                    Remove a goal
                 </Text>
             </Pressable>
             <Pressable
@@ -221,6 +272,19 @@ const styles = StyleSheet.create({
         padding: 8,
         textAlignVertical: 'top'
     },
+    inputText: {
+    alignSelf: 'center',
+    padding: 8,
+    borderRadius: 8,
+    fontWeight: '500',
+    fontSize: Platform.OS === 'web'? 13 : 6.5,
+    backgroundColor: '#0f4e70',
+    color: '#D2B80F',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    margin: 10
+  },
     changeButtons: {
         alignSelf: 'center',
         padding: 8,
