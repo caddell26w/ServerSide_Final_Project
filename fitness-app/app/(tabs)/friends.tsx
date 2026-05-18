@@ -144,12 +144,12 @@ export default function Friends() {
         - {friend.username}
       </Text>
       ))}
-      <Text style={styles.mainText}>Friend Request Recipient</Text>
+      <Text style={styles.head2}>Friend Request Recipient</Text>
       <TextInput maxLength={20} style={styles.inputText} onChangeText={onChangeRecipientText} value={recipient} placeholder="Enter here" />
       <TouchableHighlight onPress = {sendFriendRequest}>
         <Text style={styles.mainText}>Send Friend Request</Text>
       </TouchableHighlight>
-      <Text style={styles.mainText}>Friend Requests</Text>
+      <Text style={styles.head2}>Friend Requests</Text>
 
         {requests.map((request: FriendRequest) => (
           <View key={request.requesterId} style={styles.reqText}>
@@ -204,7 +204,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 18,
     marginTop: 8,
-    marginHorizontal: 41
+    marginHorizontal: 21
+  },
+  head2: {
+    fontSize: Platform.OS === 'web'? 24 : 12,
+    padding: 2,
+    color: '#D2B80F',
+    borderWidth: 4,
+    borderColor: '#134e6d',
+    borderRadius: 4,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    backgroundColor: '#0d384f',
+    textAlign: 'center',
+    marginBottom: 18,
+    marginTop: 8,
+    marginHorizontal: 21
   },
   inputText: {
     alignSelf: 'center',
