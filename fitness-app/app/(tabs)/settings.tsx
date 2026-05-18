@@ -22,6 +22,9 @@ export default function HomeScreen() {
     const [newPasswordInput, setNewPasswordInput] = useState('')
     const [goalChange, changeGoal] = useState(false) // prompt useEffect to load the goals
 
+    const [files, setFiles] = useState(null) // URI
+    const [error, setError] = useState(null) // Error Msg
+
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
         height: 0.400 * height,
@@ -104,7 +107,7 @@ export default function HomeScreen() {
             credentials: 'include',
         }).then((resp) => {return resp.json()})
         .then((json) => {
-            goalChange ? changeGoal(false) : changeGoal(true)
+            goalChange ? changeGoal(false) : changeGoal(true);
         })
     }
 
@@ -126,9 +129,12 @@ export default function HomeScreen() {
             credentials: 'include',
         }).then((resp) => {return resp.json()})
         .then((json) => {
-            if (json.status === 'SUCCESS') {Alert.alert("Password successfully changed")}
-            else {Alert.alert("Incorrect Password!")}
-        })
+            if (json.status === 'SUCCESS') {Alert.alert("Success","Password successfully changed")}
+            else {Alert.alert("No Success","Incorrect Password!")}
+        }).catch((error) => {
+            console.error("Error:", error);
+            Alert.alert("Error","Error in setPassword.");
+        });
     }
 
     useEffect(() => {
@@ -255,7 +261,7 @@ export default function HomeScreen() {
                 >
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
-                    Submit new goal
+                    Submit new password
                 </Text>
             </Pressable>
             <Pressable
