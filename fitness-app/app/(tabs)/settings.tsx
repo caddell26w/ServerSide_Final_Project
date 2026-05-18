@@ -12,7 +12,7 @@ export default function HomeScreen() {
     const [profilePicture, setProfilePicture] = useState('')
     const [goals, setGoals] = useState([''])
     const [friendsList, setFriendsList] = useState([''])
-    const [goalActive, toggleGoalActive] = useState(false)
+    const [goalActive, toggleGoalActive] = useState(1)
     const [goalInput, setGoalInput] = useState('')
 
     const boxSizing = {
@@ -78,12 +78,13 @@ export default function HomeScreen() {
         
     }
 
-    async function addGoal(goal:string) {
+    async function setGoal(goal:string, addRemove: string) {
         let url = 'http://localhost:8429/addGoal'
         let packet = {
             action: 'GOAL',
             data: {
                 'goal':`${goal}`,
+                'addNum': `${addRemove}`
             }
         }
         const response = await fetch(url, {
@@ -197,7 +198,7 @@ export default function HomeScreen() {
             </Pressable>
             <Pressable
             style={[{display: goalActive ? 'none' : 'flex'}]}
-            onPress={() => toggleGoalActive(true)}>
+            onPress={() => toggleGoalActive(2)}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Add new goal
@@ -214,8 +215,8 @@ export default function HomeScreen() {
             <Pressable
                 style={[{display: goalActive? 'flex' : 'none'}]}
                 onPress={() => {
-                    addGoal(goalInput) 
-                    toggleGoalActive(false)
+                    setGoal(goalInput, String(goalActive)) 
+                    toggleGoalActive(1)
                 }
                 }
                 >
