@@ -244,6 +244,20 @@ def addGoal():
     print(f"EDIT GOAL:{editGoalList}")
     return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
 
+@app.route("/changePassword", methods=['POST'])
+def changePassword():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    oldPassword = (request.get_json())['data']['oldPassword']
+    newPassword = (request.get_json())['data']['newPassword']
+    updateStatus = database.update_password(oldPassword,newPassword,user_id)
+    successStatus = 'SUCCESS' if updateStatus == True else 'ERROR'
+
+    return (jsonify({'status':successStatus, 'body': str(updateStatus)}))
+
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():
     token = request.cookies.get('session_id')

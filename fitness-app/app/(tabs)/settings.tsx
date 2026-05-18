@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView} from 'react-native';
+import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView, Alert} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useWindowDimensions, TextInput } from 'react-native';
 import { useNavigation } from 'expo-router';
@@ -12,8 +12,12 @@ export default function HomeScreen() {
     const [profilePicture, setProfilePicture] = useState('')
     const [goals, setGoals] = useState([''])
     const [friendsList, setFriendsList] = useState([''])
-    const [goalActive, toggleGoalActive] = useState(1)
+    const [goalActive, toggleGoalActive] = useState(1) // 1- inactive, 2-add goal, 3-remove goal
+    const [passwordActive,togglePasswordActive] = useState(1) // 1-inactive, 2- change password
+
     const [goalInput, setGoalInput] = useState('')
+    const [oldPasswordInput, setOldPasswordInput] = useState('')
+    const [newPasswordInput, setNewPasswordInput] = useState('')
     const [goalChange, changeGoal] = useState(false) // prompt useEffect to load the goals
 
     const boxSizing = {
@@ -99,6 +103,29 @@ export default function HomeScreen() {
         }).then((resp) => {return resp.json()})
         .then((json) => {
             goalChange ? changeGoal(false) : changeGoal(true)
+        })
+    }
+
+    async function setPassword(oldPassword:string, newPassword: string) {
+        let url = 'http://localhost:8429/changePassword'
+        let packet = {
+            action: 'GOAL',
+            data: {
+                'oldPassword':`${oldPassword}`,
+                'newPassword': `${newPassword}`
+            }
+        }
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {
+            if (json.status === 'SUCCESS') {Alert.alert("Password successfully changed")}
+            else {Alert.alert("Incorrect Password!")}
         })
     }
 
@@ -189,18 +216,47 @@ export default function HomeScreen() {
             </View>
             <Pressable>
                 <Text
-                style={[{margin: 8}, styles.changeButtons]}>
+                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
                     Change profile picture
                 </Text>
             </Pressable>
-            <Pressable>
+            <Pressable
+            onPress={() => togglePasswordActive(2)}>
                 <Text
-                style={[{margin: 8}, styles.changeButtons]}>
+                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
                     Update password
                 </Text>
             </Pressable>
+            <TextInput 
+                style={[styles.inputText,{display: passwordActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                placeholder='Old Password (Put something random if you dont wish to change password)'
+                placeholderTextColor={'#D2B80F'}
+                value={oldPasswordInput}
+                onChangeText={NewText => setOldPasswordInput(NewText)}
+                >
+            </TextInput>
+            <TextInput 
+                style={[styles.inputText,{display: passwordActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                placeholder='Enter new password'
+                placeholderTextColor={'#D2B80F'}
+                value={newPasswordInput}
+                onChangeText={NewText => setNewPasswordInput(NewText)}
+                >
+            </TextInput>
             <Pressable
-            style={[{display: goalActive > 1? 'none' : 'flex'}]}
+                style={[{display: passwordActive > 1? 'flex' : 'none'}]}
+                onPress={() => {
+                    setPassword(oldPasswordInput, newPasswordInput) 
+                    togglePasswordActive(1)
+                }}
+                >
+                <Text
+                style={[{margin: 8}, styles.changeButtons]}>
+                    Submit new goal
+                </Text>
+            </Pressable>
+            <Pressable
+            style={[{display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}
             onPress={() => toggleGoalActive(2)}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
@@ -231,14 +287,14 @@ export default function HomeScreen() {
             <Pressable
             onPress={() => {toggleGoalActive(3)}}> 
                 <Text
-                style={[{margin: 8}, styles.changeButtons, {display: goalActive > 1 ? 'none' : 'flex'}]}>
+                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
                     Remove a goal
                 </Text>
             </Pressable>
             <Pressable
             onPress={() => deleteAccount()}>
                 <Text
-                style={[{margin: 8}, styles.changeButtons]}>
+                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
                     Delete account
                 </Text>
             </Pressable>
