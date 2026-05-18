@@ -39,7 +39,7 @@ def user_register( username: str, password: str):
         characters = string.ascii_letters + string.digits + string.punctuation
         salt = ''.join(random.choice(characters) for i in range(length))
         return salt
-    salt = os.urandom(10)
+    salt = os.urandom(10).hex()
     salted_password = salt.encode('utf-8') + password.encode('utf-8')
     hash_object = hashlib.sha256(salted_password)
     hashed_password = hash_object.hexdigest()
@@ -252,10 +252,22 @@ def delete_user(userid: int):
                             WHERE userid = ?'''
     delete_workoutPlan = '''DELETE FROM workoutPlan
                             WHERE userid = ?'''
+    delete_userFriends = '''DELETE FROM friends
+                            WHERE userid = ?'''
+    delete_Friends = '''DELETE FROM friends
+                            WHERE friendid = ?'''
+    delete_userRequest = '''DELETE FROM friendRequests
+                            WHERE userid = ?'''
+    delete_friendRequest = '''DELETE FROM friendRequests
+                            WHERE requesterid = ?'''
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(delete_account, (userid,))
     __db.execute(delete_accountInfo, (userid,))
     __db.execute(delete_workoutPlan, (userid,))
+    __db.execute(delete_userFriends, (userid,))
+    __db.execute(delete_Friends, (userid,))
+    __db.execute(delete_userRequest, (userid,))
+    __db.execute(delete_friendRequest, (userid,))
     __db.commit()
 
 if __name__ == '__main__':

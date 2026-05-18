@@ -51,6 +51,31 @@ export default function HomeScreen() {
         return goalString
     }
 
+    async function deleteAccount() {
+        let url = 'http://localhost:8429/delete'
+        let packet = {
+            action: 'LOGIN',
+            data: {
+                'username':`${user}`,
+            }
+        }
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {
+            if (json.message === 'success'){
+            
+            navigation.getParent()?.navigate('index')
+            }
+        })
+        
+    }
+
     useEffect(() => {
         fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
@@ -154,7 +179,8 @@ export default function HomeScreen() {
                     Add new goal
                 </Text>
             </Pressable>
-            <Pressable>
+            <Pressable
+            onPress={() => deleteAccount()}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
                     Delete account

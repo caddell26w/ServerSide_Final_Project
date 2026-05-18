@@ -203,6 +203,28 @@ def friends():
         friendsList.append({"friendID": friendID, "username": friendUsername})
     return jsonify({'status' : 'SUCCESS', 'body' : {'friendsList' : friendsList}})
 
+@app.route("/delete", methods=['DELETE'])
+def deleteAccount():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    req = request.get_json()
+    reqdata = req['data']
+    userName = reqdata['username']
+    reqId = database.get_userid(userName)
+
+    if reqId == user_id:
+
+        database.delete_user(user_id)
+        if token:
+            res = make_response(jsonify({'message': 'success'}))
+            res.delete_cookie('session_id')
+            return(res)
+        
+    return jsonify({'status' : 'error', 'body': 'no_cookie'})
+
 def getUserid(token:str):
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})
