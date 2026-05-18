@@ -34,7 +34,7 @@ def getUser():
 
     return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}'}})
 
-@app.route("/register", methods=["POST", 'OPTIONS'])
+@app.route("/register", methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200

@@ -1,7 +1,8 @@
-import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView, Alert} from 'react-native';
+import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView, Alert, TouchableOpacity} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useWindowDimensions, TextInput } from 'react-native';
 import { useNavigation } from 'expo-router';
+import * as ImagePicker from "expo-image-picker";
 
 export default function HomeScreen() {
     const {width, height} = useWindowDimensions();
@@ -14,6 +15,7 @@ export default function HomeScreen() {
     const [friendsList, setFriendsList] = useState([''])
     const [goalActive, toggleGoalActive] = useState(1) // 1- inactive, 2-add goal, 3-remove goal
     const [passwordActive,togglePasswordActive] = useState(1) // 1-inactive, 2- change password
+    const [pfpActive, togglePfpActive] = useState(1) // 1-inactive, 2-changing pfp
 
     const [goalInput, setGoalInput] = useState('')
     const [oldPasswordInput, setOldPasswordInput] = useState('')
@@ -214,16 +216,17 @@ export default function HomeScreen() {
                     </ScrollView>
                 </View>
             </View>
-            <Pressable>
+            <Pressable
+            onPress = {() => togglePfpActive(2)}>
                 <Text
-                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
+                style={[{margin: 8}, styles.changeButtons, {display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}>
                     Change profile picture
                 </Text>
             </Pressable>
             <Pressable
             onPress={() => togglePasswordActive(2)}>
                 <Text
-                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
+                style={[{margin: 8}, styles.changeButtons, {display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}>
                     Update password
                 </Text>
             </Pressable>
@@ -256,7 +259,7 @@ export default function HomeScreen() {
                 </Text>
             </Pressable>
             <Pressable
-            style={[{display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}
+            style={[{display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}
             onPress={() => toggleGoalActive(2)}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
@@ -264,7 +267,7 @@ export default function HomeScreen() {
                 </Text>
             </Pressable>
             <TextInput 
-                style={[styles.inputText,{display: goalActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                style={[styles.inputText,{display: goalActive > 1 || pfpActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
                 placeholder='Enter a fitness goal'
                 placeholderTextColor={'#D2B80F'}
                 value={goalInput}
@@ -272,7 +275,7 @@ export default function HomeScreen() {
                 >
             </TextInput>
             <Pressable
-                style={[{display: goalActive > 1? 'flex' : 'none'}]}
+                style={[{display: goalActive > 1 || pfpActive > 1? 'flex' : 'none'}]}
                 onPress={() => {
                     setGoal(goalInput, String(goalActive)) 
                     toggleGoalActive(1)
@@ -287,14 +290,14 @@ export default function HomeScreen() {
             <Pressable
             onPress={() => {toggleGoalActive(3)}}> 
                 <Text
-                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
+                style={[{margin: 8}, styles.changeButtons, {display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}>
                     Remove a goal
                 </Text>
             </Pressable>
             <Pressable
             onPress={() => deleteAccount()}>
                 <Text
-                style={[{margin: 8}, styles.changeButtons, {display: (passwordActive > 1 || goalActive > 1) ? 'none': 'flex'}]}>
+                style={[{margin: 8}, styles.changeButtons, {display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}>
                     Delete account
                 </Text>
             </Pressable>
