@@ -52,7 +52,7 @@ export default function HomeScreen() {
     }
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8429/accountSettings', {credentials: 'include'})
+        fetch('https://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList)}})
         .catch((error) => {
@@ -76,7 +76,7 @@ export default function HomeScreen() {
                 alignItems: 'center'
             }}>
                 <Image 
-                    source={{ uri : `http://localhost:8429/static/users/${profilePicture}`}}
+                    source={{ uri : `https://localhost:8429/static/users/${profilePicture}`}}
                     style={{
                         width: 75,
                         height: 75,

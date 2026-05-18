@@ -167,4 +167,4 @@ def getUserid(token:str):
     user_id = ids["user_id"]
     return user_id
 
-app.run(host='0.0.0.0', port=8429, debug=True)
+app.run(host='0.0.0.0', port=8429, ssl_context=('localhost.pem', 'localhost-key.pem'), debug=True)

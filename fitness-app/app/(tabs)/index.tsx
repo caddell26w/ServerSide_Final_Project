@@ -17,7 +17,7 @@ export default function HomeScreen() {
   const [user, setUser] = useState('')
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8429/getUser', {credentials: 'include'})
+    fetch('https://localhost:8429/getUser', {credentials: 'include'})
     .then((response) => response.json())
     .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setUser(json.body.user)}})
     .catch((error) => {
@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#D2B80F',
     textAlign: 'center',
+    textTransform: 'uppercase',
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
