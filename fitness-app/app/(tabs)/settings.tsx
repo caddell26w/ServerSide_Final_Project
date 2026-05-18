@@ -14,6 +14,7 @@ export default function HomeScreen() {
     const [friendsList, setFriendsList] = useState([''])
     const [goalActive, toggleGoalActive] = useState(1)
     const [goalInput, setGoalInput] = useState('')
+    const [goalChange, changeGoal] = useState(false) // prompt useEffect to load the goals
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -27,9 +28,10 @@ export default function HomeScreen() {
     function setDataValues(userValue:string, profilePictureValue:string, goalsValue:string[], friendsListValue:string[]) {
         setUser(userValue) // username, not userid
         setProfilePicture(profilePictureValue)
-        goalsValue = goalsValue.toString().replace("[", "").replace("]", "").replace(" ", "").replace("'", "").split(",")
+        goalsValue = goalsValue.toString().replace("[", "").replace("]", "").replace("'", "").split(",")
         let goalList = []
         for (let goal of goalsValue) {
+            goal = goal.toString().replace("\"","").replace("\"","")
             goalList.push(goal)
         }
         setGoals(goalList)
@@ -95,7 +97,8 @@ export default function HomeScreen() {
             body: JSON.stringify(packet),
             credentials: 'include',
         }).then((resp) => {return resp.json()})
-        .then((json) => {setGoals(json.body)
+        .then((json) => {
+            goalChange ? changeGoal(false) : changeGoal(true)
         })
     }
 
@@ -108,7 +111,7 @@ export default function HomeScreen() {
             navigation.getParent()?.navigate('index')
         })
         
-    }, [goalActive])
+    }, [goalChange])
 
     return (
         <View
@@ -197,7 +200,7 @@ export default function HomeScreen() {
                 </Text>
             </Pressable>
             <Pressable
-            style={[{display: goalActive ? 'none' : 'flex'}]}
+            style={[{display: goalActive > 1? 'none' : 'flex'}]}
             onPress={() => toggleGoalActive(2)}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons]}>
@@ -205,7 +208,7 @@ export default function HomeScreen() {
                 </Text>
             </Pressable>
             <TextInput 
-                style={[styles.inputText,{display: goalActive? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                style={[styles.inputText,{display: goalActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
                 placeholder='Enter a fitness goal'
                 placeholderTextColor={'#D2B80F'}
                 value={goalInput}
@@ -213,7 +216,7 @@ export default function HomeScreen() {
                 >
             </TextInput>
             <Pressable
-                style={[{display: goalActive? 'flex' : 'none'}]}
+                style={[{display: goalActive > 1? 'flex' : 'none'}]}
                 onPress={() => {
                     setGoal(goalInput, String(goalActive)) 
                     toggleGoalActive(1)
@@ -225,9 +228,10 @@ export default function HomeScreen() {
                     Submit new goal
                 </Text>
             </Pressable>
-            <Pressable>
+            <Pressable
+            onPress={() => {toggleGoalActive(3)}}> 
                 <Text
-                style={[{margin: 8}, styles.changeButtons, {display: goalActive ? 'none' : 'flex'}]}>
+                style={[{margin: 8}, styles.changeButtons, {display: goalActive > 1 ? 'none' : 'flex'}]}>
                     Remove a goal
                 </Text>
             </Pressable>

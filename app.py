@@ -130,6 +130,7 @@ def accountSettings():
         friendsList = (accountInfo or {}).get('friendsList')
         if friendsList == None:
             friendsList = []
+        print(goals)
         return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
     elif request.method == 'PUT':
         return jsonify({'status' : 'SUCCESS', 'body': ''})
@@ -222,6 +223,7 @@ def addGoal():
         return user_id
     
     goalList = database.get_goals(user_id) # returns string of the list
+    addNum = (request.get_json())['data']['addNum'] # 2 = add, 3 = remove
     print(f"\nGOALS:{goalList}")
     try:
         editGoalList = json.loads(goalList[0][0]) # grabs the list inside the string, then turn it to a python list
@@ -235,7 +237,7 @@ def addGoal():
     editGoalList.append((request.get_json())['data']['goal']) # add user goal to list
     print(f"EDIT GOAL:{editGoalList}")
     database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
-    return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
+    return (jsonify({'status': 'SUCCESS', 'body':f"editGoalList"}))
 
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():
