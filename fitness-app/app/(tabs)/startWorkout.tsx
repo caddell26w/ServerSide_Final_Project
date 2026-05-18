@@ -33,6 +33,33 @@ export default function startWorkout() {
         setDailyWorkout(workoutValue)
     }
 
+    async function updateWorkout() {
+        try {
+            const response = await fetch('http://127.0.0.1:8429/updateWorkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            credentials: 'include',
+            body: JSON.stringify({
+                data: {
+                    "workoutDate": day,
+                    "workoutName": dailyWorkout
+                }
+            })
+        })
+        const data = await response.json();
+        if (data.status === 'SUCCESS') {
+            console.log('Workout updated successfully');
+        } else {
+            console.error('Failed to update workout');
+            }
+        }
+        catch(error) {
+            console.error('Error updating workout:', error);
+        };
+    }
+
     function startTimer() {
         setHideTimerLengthDisplay(true)
         setTimerInput('')
@@ -112,7 +139,7 @@ export default function startWorkout() {
             console.error('Error:', error)
             navigation.getParent()?.navigate('index')
         })
-    })
+    }, [])
 
     return (
         <View
@@ -152,6 +179,7 @@ export default function startWorkout() {
                     setIsStopwatchActive(false)
                     setHideStopwatchDisplay(true)
                     setHideTimerLengthDisplay(true)
+                    updateWorkout()
                 }}>
                     <Text
                     style={
