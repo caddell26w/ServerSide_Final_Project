@@ -22,8 +22,8 @@ export default function Activity() {
         credentials: 'include',
       });
       const response = await submit.json();
-      if (response.status === "activity retrieved")
-        setActivity(response.workouts);
+      if (response.status === "SUCCESS")
+        setActivity(response.body.workoutsList);
       else 
         Alert.alert("Failed to retrieve activity");
     } catch (error) {
