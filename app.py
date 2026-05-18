@@ -8,7 +8,7 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
-CORS(app, supports_credentials='true', origins=['http://localhost:8081', 'https://localhost', 'https://localhost:443'])
+CORS(app, supports_credentials=True)
 database.database_init()
 
 R_Server = redis.StrictRedis()
@@ -58,7 +58,7 @@ def register():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='None', secure=True)
+        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
         return(res)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
@@ -84,7 +84,7 @@ def login():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='None', secure=True)
+        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
         return(res)
 
 @app.route("/changeWorkout", methods=['POST'])
@@ -155,6 +155,50 @@ def activeFriends():
         if session_user in friendsList:
             activeFriendsList.append(session_user)
     return(jsonify({'status': 'SUCCESS', 'body' : {'activeFriendsList' : activeFriendsList, 'usersList' : usersList}}))
+
+@app.route("/request", methods=['GET','POST'])
+def handleRequest():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+
+    if request.method == 'GET':
+        friendRequests = database.get_friendRequests(user_id)
+        return jsonify({'status' : 'SUCCESS', 'body': {'friendRequests' : friendRequests}})
+    elif request.method == 'POST':
+        req = request.get_json()
+        friendUsername = req['friendUsername']
+        database.add_friendRequest(user_id, friendUsername)
+        return jsonify({'status' : 'SUCCESS', 'body': ''})
+    else: 
+        return jsonify({'status' : 'ERROR', 'body': ''})
+
+@app.route("/respondRequest", methods=['POST'])
+def respondRequest():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+
+    req = request.get_json()
+    requesterId = req['requesterId']
+    response = req['response']
+    database.respond_friendRequest(user_id, requesterId, response)
+    return jsonify({'status' : 'SUCCESS', 'body': ''})
+
+@app.route("/friends", methods=['GET'])
+def friends():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    friendsIDs = database.get_friendsList(user_id)
+    friendsList = []
+    for friendID in friendsIDs:
+        friendUsername = database.get_username(friendID)
+        friendsList.append({"friendID": friendID, "username": friendUsername})
+    return jsonify({'status' : 'SUCCESS', 'body' : {'friendsList' : friendsList}})
 
 def getUserid(token:str):
     if not token:
