@@ -125,8 +125,15 @@ export default function Friends() {
   }
 
   useEffect(() => {
+    const datafetch = () => {
     getFriends();
     getFriendRequest();
+    }
+
+    datafetch()
+
+    const interval = setInterval(datafetch, 12000)
+    return () => clearInterval(interval)
   }, []);
 
   return (
