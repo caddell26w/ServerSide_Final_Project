@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, View, ScrollView, Text, Image, Pressable} from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
@@ -29,7 +29,7 @@ export default function HomeScreen() {
     function setDataValues(userValue:string, profilePictureValue:string, friendsListValue:string[]) {
         setUser(userValue)
         setProfilePicture(profilePictureValue)
-        friendsListValue = friendsListValue.toString().replace("[", "").replace("]", "").replace(" ", "").replaceAll("'", "").split(",")
+        friendsListValue = friendsListValue.toString().replace("[", "").replace("]", "").replace(" ", "").replace("'", "").split(",")
         let friendList = []
         for (let friend of friendsListValue) {
             friendList.push(friend)
@@ -150,18 +150,27 @@ export default function HomeScreen() {
                                         width: '100%',
                                     }}>
                                     {activeFriendsList.map((activeFriend, index) => (
-                                        <Text 
-                                        key={index}
-                                        style={{
-                                            fontSize: Platform.OS === 'web'? 14 : 7,
-                                            borderBottomWidth: 1.5,
-                                            borderColor: '#0f4e70',
-                                            borderStyle: 'dashed',
-                                            padding: 3,
-                                            width: '100%',
-                                            textAlign: 'left'
-                                        }}>
-                                        {activeFriend == ''? "No Active Friends": activeFriend}</Text>
+                                        <Pressable
+                                            key={index}
+                                            onPress={() => {
+                                                if (activeFriend !== '') {
+                                                    router.push({ pathname: '/friendActivity', params: { friendUsername: activeFriend }});
+                                                }
+                                            }}>
+                                            <Text
+                                            style={{
+                                                fontSize: Platform.OS === 'web' ? 14 : 7,
+                                                borderBottomWidth: 1.5,
+                                                borderColor: '#0f4e70',
+                                                borderStyle: 'dashed',
+                                                padding: 3,
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                color: '#D2B80F'
+                                            }}>
+                                                {activeFriend == '' ? "No Active Friends" : activeFriend}
+                                            </Text>
+                                        </Pressable>
                                     ))}
                                     </View>
                                 </View>
@@ -189,18 +198,26 @@ export default function HomeScreen() {
                                         width: '100%',
                                     }}>
                                     {inactiveFriendsList.map((inactiveFriend, index) => (
-                                        <Text 
-                                        key={index}
-                                        style={{
-                                            fontSize: Platform.OS === 'web'? 14 : 7,
-                                            borderBottomWidth: 1.5,
-                                            borderColor: '#0f4e70',
-                                            borderStyle: 'dashed',
-                                            padding: 3,
-                                            width: '100%',
-                                            textAlign: 'left'
-                                        }}>
-                                        {inactiveFriend == ''? 'No Inactive Friends' : inactiveFriend}</Text>
+                                        <Pressable
+                                            key={index}
+                                            onPress={() => {
+                                                if (inactiveFriend !== '') {
+                                                    router.push({ pathname: '/friendActivity', params: { friendUsername: inactiveFriend }});
+                                                    }}}>
+                                            <Text
+                                            style={{
+                                                fontSize: Platform.OS === 'web' ? 14 : 7,
+                                                borderBottomWidth: 1.5,
+                                                borderColor: '#0f4e70',
+                                                borderStyle: 'dashed',
+                                                padding: 3,
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                color: '#D2B80F'
+                                            }}>
+                                                {inactiveFriend == '' ? 'No Inactive Friends' : inactiveFriend}
+                                            </Text>
+                                        </Pressable>
                                     ))}
                                     </View>
                                 </View>
