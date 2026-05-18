@@ -234,10 +234,15 @@ def addGoal():
     if request.method == 'GET':
         return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
     
-    editGoalList.append((request.get_json())['data']['goal']) # add user goal to list
+    if addNum == "2":
+        editGoalList.append((request.get_json())['data']['goal']) # add user goal to list
+        database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
+    elif addNum == "3":
+        if (request.get_json())['data']['goal'] in editGoalList:
+            editGoalList.remove((request.get_json())['data']['goal'])
+            database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
     print(f"EDIT GOAL:{editGoalList}")
-    database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
-    return (jsonify({'status': 'SUCCESS', 'body':f"editGoalList"}))
+    return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
 
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():
