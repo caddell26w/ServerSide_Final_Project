@@ -1,11 +1,11 @@
 import React, {useState, useEffect } from 'react';
 import { StyleSheet, Text, Platform, View, StatusBar, Alert } from 'react-native';
 
-const url = 'https://localhost:8429';
+const url = 'http://localhost:8429';
 
 export default function Activity() {
 
-  type Activity = {
+  type activity = {
     workoutName: string;
     workoutDate: string;
   }
@@ -23,7 +23,7 @@ export default function Activity() {
       });
       const response = await submit.json();
       if (response.status === "SUCCESS")
-        setActivity(response.body);
+        setActivity(response.body.workoutsList);
       else 
         Alert.alert("Failed to retrieve activity");
     } catch (error) {
@@ -37,8 +37,8 @@ export default function Activity() {
 
   return (
     <View style={styles.container}>
-      {activity.map((item: Activity) => (
-        <Text style={styles.exerciseDetails} key={item.workoutName + item.workoutDate}>
+      {activity.map((item: activity) => (
+        <Text key={item.workoutName + item.workoutDate}>
           {item.workoutName} - {item.workoutDate}
         </Text>
       ))}
@@ -49,22 +49,8 @@ export default function Activity() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b2f42',
-    paddingTop: Platform.OS === "web" ? 0 : StatusBar.currentHeight,
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
-    exerciseDetails: {
-        fontSize: Platform.OS === 'web'? 14 : 7,
-        color: '#D2B80F',
-        borderColor: '#0f4e70',
-        borderBottomRightRadius: 8,
-        borderBottomLeftRadius: 8,
-        borderWidth: 3,
-        borderStyle: 'solid',
-        marginBottom: 8,
-        padding: 8,
-        textAlignVertical: 'top',
-        marginHorizontal: 20,
-        textAlign: 'center'
-    }
 
 });

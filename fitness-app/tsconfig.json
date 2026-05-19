@@ -1,18 +1,11 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "target": "es2021",
-    "lib": ["es2021", "dom"],
-    "jsx": "react",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "allowJs": true,
-    "strict": false,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-
+    "strict": true,
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [

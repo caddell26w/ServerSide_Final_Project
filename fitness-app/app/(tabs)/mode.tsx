@@ -32,6 +32,7 @@ export default function changeWorkoutScreen() {
         width: Platform.OS === 'web' ? 0.125 * width : 0.35 * width
     }
 
+    // Retrieve day of the week and workout for that day from Flask backend
     async function changeWorkout() {
         let weeklyPlan = [sundayWorkout, mondayWorkout, tuesdayWorkout, wednesdayWorkout, thursdayWorkout, fridayWorkout, saturdayWorkout]
         let url = 'https://localhost:8429/changeWorkout'

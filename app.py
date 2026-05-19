@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
-from datetime import date
+from datetime import date, datetime
 import database
 import redis
 import uuid
 import json
+import os
+from werkzeug.utils import secure_filename
 
 # Connect Flask app, enable Cross-Origin Resource Sharing, and Initialize the database
 app = Flask(__name__)
@@ -143,6 +145,7 @@ def accountSettings():
         friendsList = (accountInfo or {}).get('friendsList')
         if friendsList == None:
             friendsList = []
+        print(goals)
         return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
     elif request.method == 'PUT':
         return jsonify({'status' : 'SUCCESS', 'body': ''})
@@ -186,7 +189,15 @@ def handleRequest():
         return jsonify({'status' : 'SUCCESS', 'body': {'friendRequests' : friendRequests}})
     elif request.method == 'POST':
         req = request.get_json()
-        friendUsername = req['friendUsername']
+        friendUsername = str(req['friendUsername'])
+
+        # prevent from requesting the same person twice
+        # prevent from friending the same person twice
+        checkRequests = database.get_friendRequests(database.get_userid(friendUsername)) 
+        friendsIDs = database.get_friendsList(user_id)
+        if str(user_id) in checkRequests or database.get_userid(friendUsername) in friendsIDs:
+            return jsonify({'status' : 'SUCCESS', 'body': ''})
+        
         database.add_friendRequest(user_id, friendUsername)
         return jsonify({'status' : 'SUCCESS', 'body': ''})
     else: 
@@ -205,16 +216,143 @@ def respondRequest():
     req = request.get_json()
     requesterId = req['requesterId']
     response = req['response']
+
+    # prevent from friending the same person twice
+    friendsIDs = database.get_friendsList(user_id) 
+    if requesterId in friendsIDs:
+        return jsonify({'status' : 'SUCCESS', 'body': ''})
+    
     database.respond_friendRequest(user_id, requesterId, response)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
-'''
-    param: token(str) The token assigned to the user at register/login
 
-    returns:
-    user_id (int) - Current user's id if signed in
-    (JSON Object) - Error message for no active sessions or invalid users
-'''
+    #param: token(str) The token assigned to the user at register/login
+
+@app.route("/addGoal", methods=['GET','POST'])
+def addGoal():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    goalList = database.get_goals(user_id) # returns string of the list
+    addNum = (request.get_json())['data']['addNum'] # 2 = add, 3 = remove
+    print(f"\nGOALS:{goalList}")
+    try:
+        editGoalList = json.loads(goalList[0][0]) # grabs the list inside the string, then turn it to a python list
+    except:
+        editGoalList = []
+        print("no need for json load")
+        pass
+    if request.method == 'GET':
+        return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
+    
+    if addNum == "2":
+        editGoalList.append((request.get_json())['data']['goal']) # add user goal to list
+        database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
+    elif addNum == "3":
+        if (request.get_json())['data']['goal'] in editGoalList:
+            editGoalList.remove((request.get_json())['data']['goal'])
+            database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
+    print(f"EDIT GOAL:{editGoalList}")
+    return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
+
+@app.route("/logWorkout", methods=['POST'])
+def workoutLog():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    dayWorkout = request.get_json()['data']['workout']
+    current = datetime.now()
+    current = current.strftime("%m/%d/%Y %H:%M") 
+    workoutString = dayWorkout + " || " + current
+    database.updateWorkoutLog(user_id,workoutString)
+
+    return (jsonify({'status': 'SUCCESS', 'body':'success'}))
+
+    # Get the current time
+
+@app.route("/activity", methods=['GET'])
+def getWorkouts():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    log = database.getWorkoutLog(user_id)
+    print(log)
+    activity = []
+    for i in log:
+        print(i)
+        iSplit = str(i).split(" || ")
+        print(iSplit)
+        activity.append({'workoutName':f'{iSplit[0].strip()}','workoutDate':f'{iSplit[1].strip()}'})
+    return (jsonify({'status': 'SUCCESS', 'body': activity}))
+
+@app.route("/changePassword", methods=['POST'])
+def changePassword():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    oldPassword = (request.get_json())['data']['oldPassword']
+    newPassword = (request.get_json())['data']['newPassword']
+    updateStatus = database.update_password(oldPassword,newPassword,user_id)
+    successStatus = 'SUCCESS' if updateStatus == True else 'ERROR'
+
+    return (jsonify({'status':successStatus, 'body': str(updateStatus)}))
+
+@app.route("/sendImage", methods=['POST'])
+def sendImage():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    # to ensure the user actually sent a file
+    if "file" not in request.files:
+        return jsonify({'status': 'ERROR', 'body': 'No file part'})
+
+    fileStorage = request.files["file"] # the storage
+    folderUpload = os.path.join(os.path.dirname(__file__), "static/users") # path to the folder
+
+    if fileStorage.filename == "": # ensures the user didnt just send a empty file
+        return jsonify({'status': 'ERROR', 'body': 'No selected file'})
+    os.makedirs(folderUpload, exist_ok=True) # creates a directory if it doesn't exist. For our case, it should exist
+    file = secure_filename(fileStorage.filename) 
+    final = f"{uuid.uuid4()}_{file}" # make file unique and secure
+    save_path = os.path.join(folderUpload, final)
+    fileStorage.save(save_path) # save it to the local folder
+    database.add_general_file(user_id,final) # update sqlite3 with the filename
+
+    return jsonify({'status': 'SUCCESS', 'body': save_path})
+
+
+@app.route("/delete", methods=['DELETE'])
+def deleteAccount():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    req = request.get_json()
+    reqdata = req['data']
+    userName = reqdata['username']
+    reqId = database.get_userid(userName)
+
+    if reqId == user_id:
+
+        database.delete_user(user_id)
+        if token:
+            res = make_response(jsonify({'message': 'success'}))
+            res.delete_cookie('session_id')
+            return(res)
+        
+    return jsonify({'status' : 'error', 'body': 'no_cookie'})
+
 def getUserid(token:str):
     if not token:
         return jsonify({'status' : 'ERROR', 'body' : 'No Active Session'})

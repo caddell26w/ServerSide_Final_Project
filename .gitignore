@@ -2,7 +2,8 @@
 
 # dependencies
 node_modules/
-venv/
+*.venv/
+
 
 # Expo
 .expo/
@@ -21,6 +22,13 @@ expo-env.d.ts
 
 # Metro
 .metro-health-check*
+
+#python
+__pycache__/*
+*.pyc
+*.exe
+fitness-app.*
+
 
 # debug
 npm-debug.*

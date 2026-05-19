@@ -25,7 +25,7 @@ export default function LoginScreen() {
                 'password':`${password}`
             }
         }
-        fetch(url, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json',

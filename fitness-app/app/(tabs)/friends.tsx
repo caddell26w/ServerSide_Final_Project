@@ -18,11 +18,11 @@ export default function FriendsScreen() {
     const [activeFriendsList, setActiveFriendsList] = useState([''])
     const [usersList, setUsersList] = useState([''])
 
-    const [friendRequests, setFriendRequests] = useState([])
+    const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
     const [friendRequestSenders, setFriendRequestSenders] = useState([''])
 
-    const requestRef = useRef(null)
-    const usersRef = useRef(null)
+    const requestRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const usersRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -65,6 +65,7 @@ export default function FriendsScreen() {
         else if (activeUsers.length == 0) {
             activeUsers = ['']
         }
+        activeUsers = activeUsers.filter(a => a.trim() !== user.trim());
         setUsersList(activeUsers)
         let inactiveFriends = []
         for (let friend of friendsList) {
@@ -93,7 +94,7 @@ export default function FriendsScreen() {
         }
         getUsersAndFriends()
         return () => {
-            clearTimeout(usersRef.current)
+            if (usersRef.current) {clearTimeout(usersRef.current)}
         }
     }, [])
     
@@ -201,7 +202,7 @@ export default function FriendsScreen() {
         }
         getRequests()
         return () => {
-            clearTimeout(requestRef.current)
+            if (requestRef.current) {clearTimeout(requestRef.current)}
         }
       }, [])
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { Platform, StyleSheet, View, Text, useWindowDimensions, Pressable, TextInput} from 'react-native';
 
@@ -67,6 +68,26 @@ export default function startWorkout() {
         setIsTimerActive(true)
     }
 
+    async function logWorkout() {
+        let url = 'https://localhost:8429/logWorkout'
+        let packet = {
+            action: 'GOAL',
+            data: {
+                'workout':`${dailyWorkout}`,
+            }
+        }
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(packet),
+            credentials: 'include',
+        }).then((resp) => {return resp.json()})
+        .then((json) => {
+        })
+    }
+
     useEffect(() => {
         if (isTimerActive == true) {
             let startTime = Date.now() 
@@ -81,6 +102,7 @@ export default function startWorkout() {
                 setSecs(newSecs)
                 if (newSecs == 0) {
                     setIsTimerActive(false)
+                    logWorkout()
                 }
             }, 1000)
             return () => clearInterval(timer)
@@ -112,7 +134,7 @@ export default function startWorkout() {
             console.error('Error:', error)
             navigation.getParent()?.navigate('index')
         })
-    })
+    }, [])
 
     return (
         <View
@@ -270,6 +292,7 @@ export default function startWorkout() {
             <Pressable
                 onPress={() => {
                     setIsStopwatchActive(false)
+                    logWorkout()
                 }}>
                 <Text 
                 style={[
