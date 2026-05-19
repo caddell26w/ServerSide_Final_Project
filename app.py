@@ -8,11 +8,13 @@ import json
 import os
 from werkzeug.utils import secure_filename
 
+# Connect Flask app, enable Cross-Origin Resource Sharing, and Initialize the database
 app = Flask(__name__)
 app.secret_key = 'supersecret'
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=['https://localhost:8081', 'https://localhost', 'https://localhost:443', 'https://localhost:8429'])
 database.database_init()
 
+# Initialize Redis Server
 R_Server = redis.StrictRedis()
 try:
     R_Server.ping()
@@ -21,10 +23,12 @@ except:
     R_Server = None
 R_Server.flushall()
 
+# Test Route
 @app.route("/", methods=['GET'])
 def index():
-    return jsonify({"body": "Hello"})
+    return jsonify({"body": "Hello World"})
 
+# Route that returns the user based of the user_id stored in cookies
 @app.route("/getUser", methods=['GET'])
 def getUser():
     token = request.cookies.get('session_id')
@@ -36,8 +40,10 @@ def getUser():
 
     return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}'}})
 
-@app.route("/register", methods=['POST', 'OPTIONS'])
+# Route that registers users on the website
+@app.route("/register", methods=["POST", 'OPTIONS'])
 def register():
+    # Ensures CORS gets a status ok, 200
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200
     req = request.get_json()
@@ -45,6 +51,8 @@ def register():
     username = reqData['username']
     password = reqData['password']
     confirmedPassword = reqData['confirmedPassword']
+    if password != confirmedPassword:
+        return jsonify({'status' : 'ERROR', 'body' : 'Passwords do not match'})
 
     usernameAvailability = database.username_check(username)
     if usernameAvailability == True: #Username Available
@@ -54,16 +62,18 @@ def register():
         user_id = database.get_userid(username)
         token = {"session_id": session_id, "user_id": user_id}
 
+        # Connects Redis server to store session and user ids
         R_Server.set(
             f"session:{session_id}",
             json.dumps(token)
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
+        res.set_cookie('session_id', session_id,  samesite='None', secure=True)
         return(res)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
+# Route to verify and login users on the website
 @app.route("/login", methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
@@ -75,7 +85,6 @@ def login():
 
     loginStatus = database.check_login(username, password)
     if loginStatus == True: #Successful Login
-        # IF Verified
         session_id = str(uuid.uuid4())
         user_id = database.get_userid(username)
         token = {"session_id": session_id, "user_id": user_id}
@@ -86,15 +95,17 @@ def login():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
+        res.set_cookie('session_id', session_id,  samesite='None', secure=True)
         return(res)
+    return jsonify({'status' : 'ERROR', 'body' : 'Invalid Password. Try Again.'})
 
+# Route that updates the weekly workout plan from uncleaned user input
 @app.route("/changeWorkout", methods=['POST'])
 def changeWorkout():
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
-    if type(user_id) != int:
-        return user_id
+    if type(user_id) != int: # Returns Error Message if user_id does not exist
+        return user_id 
 
     req = request.get_json()
     reqData = req['data']
@@ -103,6 +114,7 @@ def changeWorkout():
     res = make_response(jsonify({'status' : 'SUCCESS', 'body': ''}))
     return res
 
+# Route that gets the current day and returns the user's workout for that day
 @app.route("/getDailyWorkout", methods=['GET'])
 def getDailyWorkout():
     token = request.cookies.get('session_id')
@@ -117,6 +129,7 @@ def getDailyWorkout():
     dayWorkout = database.get_workoutPlan(user_id).get(f'{day.lower()}Workout')
     return jsonify({'status' : 'SUCCESS', 'body' : {'day' : f'{day}', 'workout' : f'{dayWorkout}'}})
 
+# Route that gathers all account specifics on a user
 @app.route("/accountSettings", methods=['GET', 'PUT'])
 def accountSettings():
     token = request.cookies.get('session_id')
@@ -136,7 +149,8 @@ def accountSettings():
         return jsonify({'status' : 'SUCCESS', 'body' : {'user' : f'{user}', 'profilePicture' : f'{profilePicture}', 'goals' : f'{goals}', 'friendsList' : f'{friendsList}'}})
     elif request.method == 'PUT':
         return jsonify({'status' : 'SUCCESS', 'body': ''})
-    
+
+# Route that gets all active friends and users on the website
 @app.route("/activeFriends", methods=['GET'])
 def activeFriends():
     token = request.cookies.get('session_id')
@@ -145,11 +159,12 @@ def activeFriends():
         return user_id
     
     friendsList = database.get_friendsList(user_id)
-    friendsList = ['admin']
-    if friendsList == None:
-        return (jsonify({'status': 'SUCCESS', 'body': {'activeFriendsList' : []}}))
 
     usersList = database.get_users()
+
+    if friendsList == None:
+        return (jsonify({'status': 'SUCCESS', 'body': {'activeFriendsList' : [], 'usersList' : usersList}}))
+
 
     activeFriendsList = []
     
@@ -159,15 +174,18 @@ def activeFriends():
             activeFriendsList.append(session_user)
     return(jsonify({'status': 'SUCCESS', 'body' : {'activeFriendsList' : activeFriendsList, 'usersList' : usersList}}))
 
+# Route that handles user's friend requests
 @app.route("/request", methods=['GET','POST'])
 def handleRequest():
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
-
+    
     if request.method == 'GET':
         friendRequests = database.get_friendRequests(user_id)
+        if friendRequests == []:
+            friendRequests = [{"requesterUsername" : "", "requesterId" : ""}]
         return jsonify({'status' : 'SUCCESS', 'body': {'friendRequests' : friendRequests}})
     elif request.method == 'POST':
         req = request.get_json()
@@ -185,8 +203,11 @@ def handleRequest():
     else: 
         return jsonify({'status' : 'ERROR', 'body': ''})
 
-@app.route("/respondRequest", methods=['POST'])
+# Route that handles the responses to user's friend requests
+@app.route("/respondRequest", methods=['POST', 'OPTIONS'])
 def respondRequest():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:
@@ -204,18 +225,8 @@ def respondRequest():
     database.respond_friendRequest(user_id, requesterId, response)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
-@app.route("/friends", methods=['GET'])
-def friends():
-    token = request.cookies.get('session_id')
-    user_id = getUserid(token)
-    if type(user_id) != int:
-        return user_id
-    friendsIDs = database.get_friendsList(user_id)
-    friendsList = []
-    for friendID in friendsIDs:
-        friendUsername = database.get_username(friendID)
-        friendsList.append({"friendID": friendID, "username": friendUsername})
-    return jsonify({'status' : 'SUCCESS', 'body' : {'friendsList' : friendsList}})
+
+    #param: token(str) The token assigned to the user at register/login
 
 @app.route("/addGoal", methods=['GET','POST'])
 def addGoal():
@@ -319,4 +330,4 @@ def getUserid(token:str):
     user_id = ids["user_id"]
     return user_id
 
-app.run(host='0.0.0.0', port=8429, debug=True)
+app.run(host='0.0.0.0', port=8429, ssl_context=('localhost.pem', 'localhost-key.pem'), debug=True)

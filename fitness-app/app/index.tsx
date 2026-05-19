@@ -21,7 +21,7 @@ export default function RegisterScreen() {
     const [isConfirmedPasswordLockToggled, setIsConfirmedPasswordLockToggled] = useState(true);
 
     async function registerUser() {
-        let url = 'http://localhost:8429/register'
+        let url = 'https://localhost:8429/register'
         let packet = {
             action: 'REGISTER',
             data: {
@@ -37,6 +37,11 @@ export default function RegisterScreen() {
             },
             body: JSON.stringify(packet),
             credentials: 'include'
+        })
+        .then((response) => response.json())
+        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})() : ''}})
+        .catch((error) => {
+            console.error('Error:', error)
         })
         setUsername('')
         setPassword('')

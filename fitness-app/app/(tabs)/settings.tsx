@@ -66,7 +66,7 @@ export default function HomeScreen() {
     }
 
     async function deleteAccount() {
-        let url = 'http://localhost:8429/delete'
+        let url = 'https://localhost:8429/delete'
         let packet = {
             action: 'LOGIN',
             data: {
@@ -91,7 +91,7 @@ export default function HomeScreen() {
     }
 
     async function setGoal(goal:string, addRemove: string) {
-        let url = 'http://localhost:8429/addGoal'
+        let url = 'https://localhost:8429/addGoal'
         let packet = {
             action: 'GOAL',
             data: {
@@ -113,7 +113,7 @@ export default function HomeScreen() {
     }
 
     async function setPassword(oldPassword:string, newPassword: string) {
-        let url = 'http://localhost:8429/changePassword'
+        let url = 'https://localhost:8429/changePassword'
         let packet = {
             action: 'GOAL',
             data: {
@@ -171,7 +171,7 @@ export default function HomeScreen() {
 
         formData.append("file", blob, `${crypto.randomUUID()}.jpg`); // ensure each filename is unique
 
-        let url = "http://localhost:8429/sendImage"
+        let url = "https://localhost:8429/sendImage"
         await fetch(url, {
             method: "POST",
             body: formData,
@@ -180,7 +180,7 @@ export default function HomeScreen() {
     }
 
     useEffect(() => {
-        fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
+        fetch('httpss://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
         .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.goals, json.body.friendsList)}})
         .catch((error) => {
@@ -204,7 +204,7 @@ export default function HomeScreen() {
                 alignItems: 'center'
             }}>
                 <Image 
-                    source={{ uri : `http://localhost:8429/static/users/${profilePicture}`}}
+                    source={{ uri : `httpss://localhost:8429/static/users/${profilePicture}`}}
                     style={{
                         width: 75,
                         height: 75,

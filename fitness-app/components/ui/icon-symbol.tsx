@@ -2,7 +2,7 @@
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
-import { ComponentProps } from 'react';
+import React, { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
 type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
@@ -22,7 +22,9 @@ const MAPPING = {
   'gearshape':'settings',
   'lock':'lock-outline',
   'lock.open':'lock-open',
-  'person.badge.plus': 'person-add-alt-1'
+  'person.badge.plus': 'person-add-alt-1',
+  'checkmark.square.fill':'check-box',
+  'square.slash':'disabled-by-default'
 } as IconMapping;
 
 /**

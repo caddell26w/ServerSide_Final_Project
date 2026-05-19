@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import React from 'react';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -16,7 +17,6 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: "modal"}}/>
         <Stack.Screen name="index" options={{ title: 'Welcome! Please register an account with us below.', 
                                               headerStyle: { backgroundColor: '#042130'}, 
                                               headerTitleStyle: {color: '#CCB414'},

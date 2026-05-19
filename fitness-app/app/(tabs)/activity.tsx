@@ -1,7 +1,7 @@
 import React, {useState, useEffect } from 'react';
 import { StyleSheet, Text, Platform, View, StatusBar, Alert } from 'react-native';
 
-const url = 'http://localhost:8429';
+const url = 'https://localhost:8429';
 
 export default function Activity() {
 
@@ -22,8 +22,8 @@ export default function Activity() {
         credentials: 'include',
       });
       const response = await submit.json();
-      if (response.status === "activity retrieved")
-        setActivity(response.workouts);
+      if (response.status === "SUCCESS")
+        setActivity(response.body.workoutsList);
       else 
         Alert.alert("Failed to retrieve activity");
     } catch (error) {
@@ -50,16 +50,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0b2f42',
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    paddingTop: Platform.OS === "web" ? 0 : StatusBar.currentHeight,
   },
-  acDcTxt: {
-    color: '#D2B80F',
-    marginVertical: 2,
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    fontWeight: '400',
-    fontSize: Platform.OS === 'web'? 18 : 9,
-    textAlign: 'center'
-  }
-  
 
 });

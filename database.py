@@ -20,9 +20,6 @@ def database_init():
                         thursdayWorkout TEXT DEFAULT 'thurWorkout',
                         fridayWorkout TEXT DEFAULT 'friWorkout',
                         saturdayWorkout TEXT DEFAULT 'satWorkout')'''
-    table_friends = '''CREATE TABLE IF NOT EXISTS friends
-                        (userid INT NOT NULL,
-                        friendid INT NOT NULL)'''
     table_friendRequests = '''CREATE TABLE IF NOT EXISTS friendRequests
                         (userid INT NOT NULL,
                         requesterid INT NOT NULL,
@@ -30,7 +27,6 @@ def database_init():
     __db.execute(table_accounts)
     __db.execute(table_accountInfo)
     __db.execute(table_workoutPlan)
-    __db.execute(table_friends)
     __db.execute(table_friendRequests)
     __db.commit()
 
@@ -104,11 +100,17 @@ def get_userid(username: str) -> int:
         return rowid
     
 def get_friendRequests(userid: int) -> list:
-    table_query = '''SELECT requesterid FROM friendRequests WHERE userid = ? AND status = 'pending' '''
+    table_query = '''SELECT requesterid 
+                     FROM friendRequests 
+                     WHERE userid = ? 
+                     AND status = 'pending' '''
     __db = sqlite3.connect("fitness-app.db")
+    __db.execute("PRAGMA journal_mode=WAL")
     cursor = __db.cursor()
     friendRequests = []
-    for row in cursor.execute(table_query, (userid,)):
+    cursor.execute(table_query, (userid,))
+    rows = cursor.fetchall()
+    for row in rows:
         friendRequests.append({
         'requesterId': row[0],
         'requesterUsername': get_username(row[0])
@@ -122,20 +124,38 @@ def respond_friendRequest(user_id: int, requesterId: int, response: str):
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(update_request, (response, user_id, requesterId))
     if response == 'ACCEPT':
-        add_friend = '''INSERT INTO friends
-                        (userid, friendid) VALUES
-                        (?, ?)'''
-        __db.execute(add_friend, (user_id, requesterId))
-        __db.execute(add_friend, (requesterId, user_id))
+        cursor = __db.cursor()
+        friendsList_query = '''SELECT friendsList
+                               FROM accountInfo
+                               WHERE userid = ?'''
+        friendsList = []
+        for row in cursor.execute(friendsList_query, (user_id,)):
+            friendsList = row[0]
+        if friendsList == None:
+            friendsList = []
+        friendsList.append(get_username(requesterId))
+        update_accountInfo_friendsList(f'{friendsList}', user_id)
+        friendsList = []
+        for row in cursor.execute(friendsList_query, (requesterId,)):
+            friendsList = row[0]
+        if friendsList == None:
+            friendsList = []
+        friendsList.append(get_username(user_id))
+        update_accountInfo_friendsList(f'{friendsList}', requesterId)
     __db.commit()
 
 def get_friendsList(userid: int) -> list:
-    table_query = '''SELECT friendid FROM friends WHERE userid = ?'''
+    table_query = '''SELECT friendsList 
+                     FROM accountInfo 
+                     WHERE userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
+    __db.execute("PRAGMA journal_mode=WAL")
     cursor = __db.cursor()
     friendsList = []
-    for row in cursor.execute(table_query, (userid,)):
-        friendsList.append(row[0])
+    cursor.execute(table_query, (userid,))
+    rows = cursor.fetchall()
+    for row in rows:
+        friendsList = row[0]
     return friendsList
 
 def get_username(userid: int) -> str:
@@ -150,9 +170,12 @@ def get_username(userid: int) -> str:
 def get_users() -> str:
     table_query = '''SELECT username from accounts'''
     __db = sqlite3.connect("fitness-app.db")
+    __db.execute("PRAGMA journal_mode=WAL")
     cursor = __db.cursor()
     userList = []
-    for row in cursor.execute(table_query):
+    cursor.execute(table_query)
+    rows = cursor.fetchall()
+    for row in rows:
         userList.append(row[0])
     return userList
 
@@ -217,7 +240,7 @@ def update_accountInfo_goals(goals: str, userid: int):
     __db.execute(update_accountInfo, (goals, userid))
     __db.commit()
 
-def update_accountInfo_friendsList(friendsList: str, userid: int):
+def update_accountInfo_friendsList(friendsList: list, userid: int):
     update_accountInfo = '''UPDATE accountInfo
                             SET friendsList = ?
                             WHERE userid = ?'''

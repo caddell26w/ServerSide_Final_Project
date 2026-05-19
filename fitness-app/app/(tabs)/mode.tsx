@@ -1,5 +1,5 @@
 import { Platform, StyleSheet, View, Text, TextInput, Button, Pressable} from 'react-native';
-import { cloneElement, useState} from 'react';
+import React, { cloneElement, useState} from 'react';
 import { useNavigation } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 
@@ -35,7 +35,7 @@ export default function changeWorkoutScreen() {
     // Retrieve day of the week and workout for that day from Flask backend
     async function changeWorkout() {
         let weeklyPlan = [sundayWorkout, mondayWorkout, tuesdayWorkout, wednesdayWorkout, thursdayWorkout, fridayWorkout, saturdayWorkout]
-        let url = 'http://localhost:8429/changeWorkout'
+        let url = 'https://localhost:8429/changeWorkout'
         let packet = {
             action: 'CHANGE',
             data: {
