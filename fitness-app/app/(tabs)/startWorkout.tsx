@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { Platform, StyleSheet, View, Text, useWindowDimensions, Pressable, TextInput} from 'react-native';
+import { hide } from 'expo-router/build/utils/splash';
 
 export default function startWorkout() {
     const {width, height} = useWindowDimensions();
@@ -32,6 +33,14 @@ export default function startWorkout() {
     function setDataValues(dayValue:string, workoutValue:string) {
         setDay(dayValue)
         setDailyWorkout(workoutValue)
+    }
+
+    function hideDisplays() {
+        setShowTimeButtons(false)
+        setIsTimerActive(false)
+        setIsStopwatchActive(false)
+        setHideStopwatchDisplay(true)
+        setHideTimerLengthDisplay(true)
     }
 
     function startTimer() {
@@ -180,7 +189,8 @@ export default function startWorkout() {
                         styles.changeButtons
                     }>Complete a set</Text>
                 </Pressable>
-                <Pressable>
+                <Pressable
+                    onPress={() => hideDisplays()}>
                     <Text
                     style={[
                         styles.changeButtons,

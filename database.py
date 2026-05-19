@@ -267,9 +267,10 @@ def getWorkoutLog(userid: int) -> list:
 
     for row in cursor.execute(workoutQuery, (userid,)):
         workout = row[0]
-        workout[0] = ""
-        workout[-1] = ""
-        workoutList.append(row[0])
+        if workout is not None:
+            workout[0] = ""
+            workout[-1] = ""
+            workoutList.append(row[0])
     if workoutList is None:
         workoutList = []
     

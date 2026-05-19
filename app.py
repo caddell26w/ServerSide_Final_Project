@@ -94,10 +94,11 @@ def login():
             json.dumps(token)
         )
 
-        res = make_response(jsonify({'message': 'Success'}))
+        res = make_response(jsonify({'status': 'SUCCESS'}))
         res.set_cookie('session_id', session_id,  samesite='None', secure=True)
         return(res)
-    return jsonify({'status' : 'ERROR', 'body' : 'Invalid Password. Try Again.'})
+    else:
+        return jsonify({'status' : 'ERROR', 'body' : 'Invalid Password. Try Again.'})
 
 # Route that updates the weekly workout plan from uncleaned user input
 @app.route("/changeWorkout", methods=['POST'])

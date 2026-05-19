@@ -25,7 +25,7 @@ export default function LoginScreen() {
                 'password':`${password}`
             }
         }
-        const response = await fetch(url, {
+        await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json',
@@ -33,14 +33,18 @@ export default function LoginScreen() {
             body: JSON.stringify(packet),
             credentials: 'include',
         })
-        .then((response) => response.json())
-        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): ''}})
+        .then((response) => {return response.json()})
+        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): navigateHome()}})
         .catch((error) => {
             console.error('Error:', error)
             setUsername('')
             setPassword('')
             setVisiblePasswordText('')
         })
+        
+    }
+
+    function navigateHome() {
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
