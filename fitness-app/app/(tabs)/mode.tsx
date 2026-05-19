@@ -284,6 +284,7 @@ const styles = StyleSheet.create({
     exerciseDetails: {
         fontSize: Platform.OS === 'web'? 14 : 7,
         borderColor: '#0f4e70',
+        color: '#D2B80F',
         borderBottomRightRadius: 8,
         borderBottomLeftRadius: 8,
         borderWidth: 3,
