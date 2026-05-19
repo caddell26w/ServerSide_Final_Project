@@ -65,6 +65,7 @@ export default function FriendsScreen() {
         else if (activeUsers.length == 0) {
             activeUsers = ['']
         }
+        activeUsers = activeUsers.filter(a => a.trim() !== user.trim());
         setUsersList(activeUsers)
         let inactiveFriends = []
         for (let friend of friendsList) {

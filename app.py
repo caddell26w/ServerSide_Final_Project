@@ -189,7 +189,7 @@ def handleRequest():
         return jsonify({'status' : 'SUCCESS', 'body': {'friendRequests' : friendRequests}})
     elif request.method == 'POST':
         req = request.get_json()
-        friendUsername = req['friendUsername']
+        friendUsername = str(req['friendUsername'])
 
         # prevent from requesting the same person twice
         # prevent from friending the same person twice

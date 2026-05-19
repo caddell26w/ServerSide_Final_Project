@@ -134,15 +134,20 @@ def respond_friendRequest(user_id: int, requesterId: int, response: str):
         if friendsList == None:
             friendsList = []
         friendsList.append(get_username(requesterId))
+        __db.commit()
+        __db.close()
         update_accountInfo_friendsList(f'{friendsList}', user_id)
+        __db = sqlite3.connect("fitness-app.db")
         friendsList = []
         for row in cursor.execute(friendsList_query, (requesterId,)):
             friendsList = row[0]
         if friendsList == None:
             friendsList = []
         friendsList.append(get_username(user_id))
+        __db.close()
         update_accountInfo_friendsList(f'{friendsList}', requesterId)
-    __db.commit()
+    else:
+        __db.commit()
 
 def get_friendsList(userid: int) -> list:
     table_query = '''SELECT friendsList 
@@ -156,6 +161,9 @@ def get_friendsList(userid: int) -> list:
     rows = cursor.fetchall()
     for row in rows:
         friendsList = row[0]
+    if friendsList is None:
+        friendsList = []
+    cursor.close()
     return friendsList
 
 def get_username(userid: int) -> str:
@@ -187,6 +195,7 @@ def add_friendRequest(user_id: int, friendUsername: str):
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(insert_request, (friend_id, user_id))
     __db.commit()
+    __db.close()
 
 def update_password(currentPassword: str, newPassword: str, userid: int) -> bool:
     table_query = '''SELECT * from accounts
@@ -244,9 +253,10 @@ def update_accountInfo_friendsList(friendsList: list, userid: int):
     update_accountInfo = '''UPDATE accountInfo
                             SET friendsList = ?
                             WHERE userid = ?'''
-    __db = sqlite3.connect("fitness-app.db")
+    __db = sqlite3.connect('fitness-app.db')
     __db.execute(update_accountInfo, (friendsList, userid))
     __db.commit()
+    __db.close()
 
 def get_accountInfo(userid: int) -> dict:
     table_query = '''SELECT * from accountInfo
