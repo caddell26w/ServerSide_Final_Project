@@ -27,11 +27,17 @@ def database_init():
                         (userid INT NOT NULL,
                         requesterid INT NOT NULL,
                         status TEXT NOT NULL)'''
+    table_workouts = '''CREATE TABLE IF NOT EXISTS workouts
+                        (workoutid INTEGER PRIMARY KEY AUTOINCREMENT,
+                        userid INT NOT NULL,
+                        workoutName TEXT NOT NULL,
+                        workoutDate TEXT NOT NULL)'''
     __db.execute(table_accounts)
     __db.execute(table_accountInfo)
     __db.execute(table_workoutPlan)
     __db.execute(table_friends)
     __db.execute(table_friendRequests)
+    __db.execute(table_workouts)
     __db.commit()
 
 def user_register( username: str, password: str):
@@ -257,6 +263,24 @@ def delete_user(userid: int):
     __db.execute(delete_accountInfo, (userid,))
     __db.execute(delete_workoutPlan, (userid,))
     __db.commit()
+
+def add_workout(userid: int, workoutName: str, workoutDate: str):
+    insert_workout = '''INSERT INTO workouts
+                        (userid, workoutName, workoutDate) VALUES
+                        (?, ?, ?)'''
+    __db = sqlite3.connect("fitness-app.db")
+    __db.execute(insert_workout, (userid, workoutName, workoutDate))
+    __db.commit()
+
+def get_workouts(userid: int) -> list:
+    table_query = '''SELECT workoutName, workoutDate from workouts
+                     WHERE userid = ? ORDER BY workoutDate DESC LIMIT 10'''
+    __db = sqlite3.connect("fitness-app.db")
+    cursor = __db.cursor()
+    workoutsList = []
+    for row in cursor.execute(table_query, (userid,)):
+        workoutsList.append({'workoutName': row[0], 'workoutDate': row[1]})
+    return workoutsList
 
 if __name__ == '__main__':
     database_init()

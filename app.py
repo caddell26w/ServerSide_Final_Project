@@ -195,10 +195,44 @@ def friends():
         return user_id
     friendsIDs = database.get_friendsList(user_id)
     friendsList = []
+    if not friendsIDs:
+        return jsonify({'status' : 'SUCCESS', 'body' : {'friendsList' : []}})
     for friendID in friendsIDs:
         friendUsername = database.get_username(friendID)
         friendsList.append({"friendID": friendID, "username": friendUsername})
     return jsonify({'status' : 'SUCCESS', 'body' : {'friendsList' : friendsList}})
+
+@app.route("/activity", methods=['GET'])
+def activity():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    workoutsList = database.get_workouts(user_id)
+    return jsonify({'status' : 'SUCCESS', 'body' : {'workoutsList' : workoutsList}})
+
+@app.route("/updateWorkout", methods=['POST'])
+def updateWorkout():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    req = request.get_json()
+    reqData = req['data']
+    database.add_workout(user_id, reqData.get('workoutName'), reqData.get('workoutDate'))
+    return jsonify({'status' : 'SUCCESS'})
+
+@app.route("/friendActivity/<friend_username>", methods=['GET'])
+def friendActivity(friend_username):
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    friend_id = database.get_userid(friend_username)
+    if friend_id not in database.get_friendsList(user_id):
+        return jsonify({'status' : 'ERROR', 'body' : 'Not Friends'})
+    workoutsList = database.get_workouts(friend_id)
+    return jsonify({'status' : 'SUCCESS', 'body' : {'workoutsList' : workoutsList}})
 
 def getUserid(token:str):
     if not token:
