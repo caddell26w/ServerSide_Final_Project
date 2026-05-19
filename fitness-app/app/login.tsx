@@ -25,7 +25,7 @@ export default function LoginScreen() {
                 'password':`${password}`
             }
         }
-        const response = await fetch(url, {
+        fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json',
@@ -33,12 +33,25 @@ export default function LoginScreen() {
             body: JSON.stringify(packet),
             credentials: 'include',
         })
+        .then((response) => response.json())
+        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): ''}})
+        .catch((error) => {
+            console.error('Error:', error)
+            setUsername('')
+            setPassword('')
+            setVisiblePasswordText('')
+        })
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
-        router.navigate('/(tabs)') // IF USER LOGS IN
+        router.navigate('/(tabs)')
     }
 
+    /*
+        Hides the passwords inital text to (*) characters
+
+        @param passwordText (string) the current text of the password on the screen to be hidden
+     */
     function hidePassword(passwordText:string) {
         let hiddenString = ''
         let passwordLen = passwordText.length
@@ -55,6 +68,11 @@ export default function LoginScreen() {
         setVisiblePasswordText(hiddenString)
     }
 
+        /*
+        Shows the passwords inital text from (*) characters
+
+        @param passwordText (string) the current text of the password on the screen to be displayed
+     */
     function showPassword(passwordText:string) {
         if (passwordText.includes('*')) {
             setVisiblePasswordText(password)
@@ -65,6 +83,9 @@ export default function LoginScreen() {
         }
     }
 
+    /*
+        Determines the status of the password lock
+    */
     function passwordLockPressed() {
         !isPasswordLockToggled? hidePassword(visiblePasswordText) : showPassword(visiblePasswordText)
         setIsPasswordLockToggled(!isPasswordLockToggled)

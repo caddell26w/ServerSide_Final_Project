@@ -38,6 +38,11 @@ export default function RegisterScreen() {
             body: JSON.stringify(packet),
             credentials: 'include'
         })
+        .then((response) => response.json())
+        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})() : ''}})
+        .catch((error) => {
+            console.error('Error:', error)
+        })
         setUsername('')
         setPassword('')
         setVisiblePasswordText('')
