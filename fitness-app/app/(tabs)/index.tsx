@@ -18,13 +18,14 @@ export default function HomeScreen() {
 
   const [user, setUser] = useState('')
 
+  // Get the username of the user for the top
   useEffect(() => {
     fetch('https://localhost:8429/getUser', {credentials: 'include'})
     .then((response) => response.json())
     .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setUser(json.body.user)}})
     .catch((error) => {
         console.error('Error:', error)
-        navigation.getParent()?.navigate('index')
+        navigation.getParent()?.navigate('index') // if not logged in or error in browser
     })
   })
   return (

@@ -42,14 +42,16 @@ export default function startWorkout() {
             throw new Error("String must be in the format [value] [measurement]")
         }
         let timeLength = Number(input[0])
+        // Ensures timer is in valid format
         if (Number.isNaN(timeLength)) {
             throw new Error("Value for time length in the format [value] [measurement] could not be parsed as a Number")
         }
-        let secondsList = ['s', 'sec', 'secs', 'second', 'seconds']
+        let secondsList = ['s', 'sec', 'secs', 'second', 'seconds'] // allows user flexibility in measurements
         let minutesList = ['min', 'mins', 'minute', 'minutes']
         let hoursList = ['hr', 'hrs', 'hour', 'hours']
         let validMeasurements = [secondsList, minutesList, hoursList].flat()
         let measurement = input[1]
+        // Ensures timer is in valid format
         if (!(validMeasurements.includes(measurement))) {
             throw new Error("Measurement for time length in the format [value] [measurement] is not a valid measurement")
         }
@@ -102,11 +104,11 @@ export default function startWorkout() {
                 setSecs(newSecs)
                 if (newSecs == 0) {
                     setIsTimerActive(false)
-                    logWorkout()
+                    logWorkout() // timer up, workout done
                 }
             }, 1000)
-            return () => clearInterval(timer)
-        }}, [isTimerActive])
+            return () => clearInterval(timer) // when done, timer turns off
+        }}, [isTimerActive]) // reruns every time we on/off the timer
 
     useEffect(() => {
         if (isStopwatchActive == true) {
@@ -124,7 +126,7 @@ export default function startWorkout() {
                 setSecs(newSecs)
             }, 1000)
             return () => clearInterval(stopwatch)
-        }}, [isStopwatchActive])
+        }}, [isStopwatchActive]) // reruns every time we on/off the stopwatch
     
     useEffect(() => {
         fetch('https://localhost:8429/getDailyWorkout', {credentials: 'include'})
@@ -292,7 +294,7 @@ export default function startWorkout() {
             <Pressable
                 onPress={() => {
                     setIsStopwatchActive(false)
-                    logWorkout()
+                    logWorkout() // Stopwatch stopped- workout done
                 }}>
                 <Text 
                 style={[

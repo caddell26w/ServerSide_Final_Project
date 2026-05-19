@@ -13,6 +13,7 @@ export default function HomeScreen() {
     const [profilePicture, setProfilePicture] = useState('')
     const [goals, setGoals] = useState([''])
     const [friendsList, setFriendsList] = useState([''])
+    // For the three below, the button appearances depend on these values
     const [goalActive, toggleGoalActive] = useState(1) // 1- inactive, 2-add goal, 3-remove goal
     const [passwordActive,togglePasswordActive] = useState(1) // 1-inactive, 2- change password
     const [pfpActive, togglePfpActive] = useState(1) // 1-inactive, 2-changing pfp
@@ -34,7 +35,10 @@ export default function HomeScreen() {
         width: Platform.OS === 'web' ? 0.400 * width : 0.35 * width
     }
 
-
+    /*
+    Input: the values of the user as a string
+    Purpose: Turn values into the state, and some into arrays to ensure we map over them
+    */
     function setDataValues(userValue:string, profilePictureValue:string, goalsValue:string[], friendsListValue:string[]) {
         setUser(userValue) // username, not userid
         setProfilePicture(profilePictureValue)
@@ -85,12 +89,14 @@ export default function HomeScreen() {
         .then((json) => {
             if (json.message === 'success'){
             
-            navigation.getParent()?.navigate('index')
+            navigation.getParent()?.navigate('index') // sends to register page
             }
         })
         
     }
 
+    // Set the user goal or remove it based on addRemove
+    // addRemove (2) -> add, addRemove (3) -> remove
     async function setGoal(goal:string, addRemove: string) {
         let url = 'https://localhost:8429/addGoal'
         let packet = {
@@ -109,10 +115,11 @@ export default function HomeScreen() {
             credentials: 'include',
         }).then((resp) => {return resp.json()})
         .then((json) => {
-            goalChange ? changeGoal(false) : changeGoal(true);
+            goalChange ? changeGoal(false) : changeGoal(true); // allows real time updating in goals
         })
     }
 
+    // Set the new password based on the two inputs
     async function setPassword(oldPassword:string, newPassword: string) {
         let url = 'https://localhost:8429/changePassword'
         let packet = {
@@ -131,6 +138,7 @@ export default function HomeScreen() {
             credentials: 'include',
         }).then((resp) => {return resp.json()})
         .then((json) => {
+            // Allows information on whether the papssword was a success or not
             if (json.status === 'SUCCESS') {Alert.alert("Success","Password successfully changed")}
             else {Alert.alert("No Success","Incorrect Password!")}
         }).catch((error) => {
@@ -141,7 +149,8 @@ export default function HomeScreen() {
 
     // User upload system
     const getImage = async () => {
-        const {status} = await imageExpo.requestMediaLibraryPermissionsAsync()
+        // confirms whether the user's external services allow the program to access their media
+        const {status} = await imageExpo.requestMediaLibraryPermissionsAsync() 
 
         if (status !== "granted") {
 
@@ -151,23 +160,24 @@ export default function HomeScreen() {
             )
         } else { 
 
-            const result = await imageExpo.launchImageLibraryAsync();
+            const result = await imageExpo.launchImageLibraryAsync(); // opens user library where they input an image
 
             if (!result.canceled) {
-                setURI(result.assets?.[0]?.uri)
+                setURI(result.assets?.[0]?.uri) // uri which we use to retrieve the bytes
 
                 setError(null)
             }
         }
     }
 
+    // what actually sends the image to the backend to store
     const uploadImage = async () => {
         if (URI == null) {return;}
 
-        const formData = new FormData()
+        const formData = new FormData() // how we send it to the Flask
 
         // append is using a diff config than what we want so we use as any to ignore typescript
-        const res = await fetch(URI);   // get the bytes from the blob url
+        const res = await fetch(URI);   // get the bytes from the blob uri
         const blob = await res.blob();  // real file data
 
         formData.append("file", blob, `${crypto.randomUUID()}.jpg`); // ensure each filename is unique
@@ -177,7 +187,7 @@ export default function HomeScreen() {
             method: "POST",
             body: formData,
             credentials: 'include'
-        }).then((response) => response.json()).then((json) => {pfpChange ? changePfp(false) : changePfp(true);})
+        }).then((response) => response.json()).then((json) => {pfpChange ? changePfp(false) : changePfp(true);}) // realtime updating
     }
 
     useEffect(() => {
@@ -189,7 +199,7 @@ export default function HomeScreen() {
             navigation.getParent()?.navigate('index')
         })
         
-    }, [goalChange, pfpChange])
+    }, [goalChange, pfpChange]) // re runs when goal/pfp is changed
 
     return (
         <View
@@ -268,7 +278,8 @@ export default function HomeScreen() {
             <Pressable
             onPress = {() => {
             togglePfpActive(2)
-            getImage()}}>
+            getImage() // prompts user to put a photo 
+            }}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons, {display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}>
                     Change profile picture
@@ -277,7 +288,8 @@ export default function HomeScreen() {
             <Pressable
             onPress = {() => {
             togglePfpActive(1) 
-            uploadImage() }}>
+            uploadImage() // allow user to submit photo
+            }}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons, {display: ((pfpActive <= 1)) ? 'none': 'flex'}]}>
                     Submit profile picture
@@ -294,7 +306,7 @@ export default function HomeScreen() {
                 style={[styles.inputText,{display: passwordActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
                 placeholder='Old Password (Put something random if you dont wish to change password)'
                 placeholderTextColor={'#D2B80F'}
-                value={oldPasswordInput}
+                value={oldPasswordInput} 
                 onChangeText={NewText => setOldPasswordInput(NewText)}
                 >
             </TextInput>

@@ -257,6 +257,7 @@ def addGoal():
     print(f"EDIT GOAL:{editGoalList}")
     return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
 
+# Route to log the workout
 @app.route("/logWorkout", methods=['POST'])
 def workoutLog():
     token = request.cookies.get('session_id')
@@ -266,14 +267,15 @@ def workoutLog():
     
     dayWorkout = request.get_json()['data']['workout']
     current = datetime.now()
-    current = current.strftime("%m/%d/%Y %H:%M") 
-    workoutString = dayWorkout + " || " + current
+    current = current.strftime("%m/%d/%Y %H:%M") # current time. month/day/year hour:minute format
+    workoutString = dayWorkout + " || " + current # || to separate. Doesn't handle edge case
     database.updateWorkoutLog(user_id,workoutString)
 
     return (jsonify({'status': 'SUCCESS', 'body':'success'}))
 
     # Get the current time
 
+# route to get the activites list
 @app.route("/activity", methods=['GET'])
 def getWorkouts():
     token = request.cookies.get('session_id')
@@ -286,11 +288,14 @@ def getWorkouts():
     activity = []
     for i in log:
         print(i)
-        iSplit = str(i).split(" || ")
+        iSplit = str(i).split(" || ") # Get the individual component to send to the frontend
         print(iSplit)
-        activity.append({'workoutName':f'{iSplit[0].strip()}','workoutDate':f'{iSplit[1].strip()}'})
-    return (jsonify({'status': 'SUCCESS', 'body': activity}))
+        # dictionary for typescript
+        activity.append({'workoutName':f'{iSplit[0].strip()}','workoutDate':f'{iSplit[1].strip()}'}) 
+    print(activity)
+    return (jsonify({'status': 'SUCCESS', 'body': log}))
 
+# Route to change the password
 @app.route("/changePassword", methods=['POST'])
 def changePassword():
     token = request.cookies.get('session_id')
@@ -305,6 +310,7 @@ def changePassword():
 
     return (jsonify({'status':successStatus, 'body': str(updateStatus)}))
 
+# Route to send the image
 @app.route("/sendImage", methods=['POST'])
 def sendImage():
     token = request.cookies.get('session_id')
@@ -330,7 +336,7 @@ def sendImage():
 
     return jsonify({'status': 'SUCCESS', 'body': save_path})
 
-
+# Delete the account
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():
     token = request.cookies.get('session_id')
@@ -343,12 +349,13 @@ def deleteAccount():
     userName = reqdata['username']
     reqId = database.get_userid(userName)
 
+    # Ensure the user only deletes their own account
     if reqId == user_id:
 
         database.delete_user(user_id)
         if token:
             res = make_response(jsonify({'message': 'success'}))
-            res.delete_cookie('session_id')
+            res.delete_cookie('session_id') # End their session
             return(res)
         
     return jsonify({'status' : 'error', 'body': 'no_cookie'})

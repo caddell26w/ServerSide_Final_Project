@@ -18,9 +18,11 @@ export default function FriendsScreen() {
     const [activeFriendsList, setActiveFriendsList] = useState([''])
     const [usersList, setUsersList] = useState([''])
 
+    // Set types to avoid typescript error
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
     const [friendRequestSenders, setFriendRequestSenders] = useState([''])
 
+    // Set the types to avoid a typescript error
     const requestRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const usersRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,6 +39,11 @@ export default function FriendsScreen() {
         requesterUsername: string
     }
 
+    /*
+
+    input: values from the database
+    purpose: turn the strings of the values into a list to ensure mapping works
+    */
     function setDataValues(userValue:string, profilePictureValue:string, friendsListValue:string[]) {
         setUser(userValue)
         setProfilePicture(profilePictureValue)
@@ -48,6 +55,10 @@ export default function FriendsScreen() {
         setFriendsList(friendList)
     }
 
+    /*
+    Input: list of users, and list of friends active
+    Purpose: Sort them into inactive friends, active friends, or exclude them from the two lists
+    */
     function updateActiveUsers(activeFriends: Array<string>, users: Array<string>) {
         if (activeFriends == undefined) {
             activeFriends = ['']
@@ -79,6 +90,9 @@ export default function FriendsScreen() {
         setInactiveFriendsList(inactiveFriends)
     }
 
+    /*
+    Get the user and friends list from the database
+    */
     useEffect(() => {
         function getUsersAndFriends() {
             setTimeout(function run() {
@@ -89,7 +103,7 @@ export default function FriendsScreen() {
                     console.error('Error:', error)
                     navigation.getParent()?.navigate('index')
                 })
-                usersRef.current = setTimeout(run, 2000)
+                usersRef.current = setTimeout(run, 2000) // real time updating
             }, 5000)
         }
         getUsersAndFriends()
@@ -98,6 +112,9 @@ export default function FriendsScreen() {
         }
     }, [])
     
+    /*
+    Send the request to the user (input)
+    */
     async function sendFriendRequest(user: string) {
         try {
             const submit = await fetch(`https://localhost:8429/request`, {
@@ -123,6 +140,7 @@ export default function FriendsScreen() {
             }
     }
 
+    // Accept the request from the person who requested it (the input)
     async function acceptFriendRequest(requesterId:number){
           try {
             const submit = await fetch(`https://localhost:8429/respondRequest`, {
@@ -146,6 +164,7 @@ export default function FriendsScreen() {
           }
       }
     
+    // Decline the request from the person who requested it (the input)
     async function declineFriendRequest(requesterId:number){
         try {
         const submit = await fetch(`https://localhost:8429/respondRequest`, {
@@ -169,6 +188,7 @@ export default function FriendsScreen() {
         }
     }
 
+    // Get the friend requests
     async function getFriendRequests(){
         try {
             const submit = await fetch(`https://localhost:8429/request`, {
@@ -188,6 +208,7 @@ export default function FriendsScreen() {
         }
     }
 
+    // Every so often get the friend requests from the sqlite database
     useEffect(() => {
         function getRequests() {
             setTimeout (function run() {
@@ -197,7 +218,7 @@ export default function FriendsScreen() {
                     requesters.push(request.requesterUsername)
                 }
                 setFriendRequestSenders(requesters)
-                requestRef.current = setTimeout(run, 2000)
+                requestRef.current = setTimeout(run, 2000) // real time updating
             }, 5000)
         }
         getRequests()
@@ -206,13 +227,16 @@ export default function FriendsScreen() {
         }
       }, [])
 
+    /*
+    Get account info from database, which goes on the top to display the profile of the user using the page
+    */
     useEffect(() => {
             fetch('https://localhost:8429/accountSettings', {credentials: 'include'})
             .then((response) => response.json())
             .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): setDataValues(json.body.user, json.body.profilePicture, json.body.friendsList)}})
             .catch((error) => {
                 console.error('Error:', error)
-                navigation.getParent()?.navigate('index')
+                navigation.getParent()?.navigate('index') // if not logged in or error in browser
             })
     }, [])
 
