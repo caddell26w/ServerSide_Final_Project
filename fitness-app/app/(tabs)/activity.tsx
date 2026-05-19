@@ -10,7 +10,7 @@ export default function Activity() {
     workoutDate: string;
   } // in future works, this allows us to better make use of each variable such as ordering
 
-  const [activity, setActivity] = useState([]);
+  const [activity, setActivity] = useState<string []>([]);
 
   /*
 
@@ -27,12 +27,22 @@ export default function Activity() {
       });
       const response = await submit.json();
       if (response.status === "SUCCESS")
-        setActivity(response.body); // python list of dictionaries, which turn to arrays we map over
+        setAct(response.body); // python list of dictionaries, which turn to arrays we map over
       else 
         Alert.alert("Failed to retrieve activity");
     } catch (error) {
       console.error("Error fetching activity:", error);
     }
+  }
+
+  function setAct(activity: string) {
+            let activityList = []
+            activityList = activity.toString().replace("[", "").replace("]", "").replace(" ", "").replaceAll("'", "").split(",")
+            let friendList = []
+            for (let friend of activity) {
+                friendList.push(friend)
+        }
+        setActivity(friendList)
   }
 
   useEffect(() => {
@@ -41,9 +51,9 @@ export default function Activity() {
 
   return (
     <View style={styles.container}>
-      {activity.map((item: Activity) => (
-        <Text style={styles.exerciseDetails} key={item.workoutName + item.workoutDate}>
-          {item.workoutName} - {item.workoutDate}
+      {activity.map((item: string) => (
+        <Text style={styles.exerciseDetails} >
+          {item}
         </Text>
       ))}
     </View>

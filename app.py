@@ -292,7 +292,8 @@ def getWorkouts():
         print(iSplit)
         # dictionary for typescript
         activity.append({'workoutName':f'{iSplit[0].strip()}','workoutDate':f'{iSplit[1].strip()}'}) 
-    return (jsonify({'status': 'SUCCESS', 'body': activity}))
+    print(activity)
+    return (jsonify({'status': 'SUCCESS', 'body': log}))
 
 # Route to change the password
 @app.route("/changePassword", methods=['POST'])

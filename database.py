@@ -1,4 +1,4 @@
-import sqlite3, string, random, hashlib,os
+import sqlite3, string, random, hashlib,os,json
 
 def database_init():
     __db = sqlite3.connect("fitness-app.db")
@@ -256,12 +256,12 @@ def updateWorkoutLog(userid: int, workout: str) -> list:
     cursor = __db.cursor()
 
     for row in cursor.execute(workoutQuery, (userid,)):
-        workoutList = row[0]
+        workoutList = json.loads(row[0])
     if workoutList is None:
         workoutList = []
     workoutList.append(workout)
     workoutUpdate = '''UPDATE workoutLog set workoutList = ? WHERE userid = ?'''
-    __db.execute(workoutUpdate, (f'{workoutList}',userid))
+    __db.execute(workoutUpdate, (json.dumps(workoutList),userid))
     __db.commit()
     return workoutList
 
@@ -272,10 +272,7 @@ def getWorkoutLog(userid: int) -> list:
     cursor = __db.cursor()
 
     for row in cursor.execute(workoutQuery, (userid,)):
-        workout = row[0]
-        workout = workout[1:-1]
-        workoutList.append(workout) # Transforms it to a list, which we loop through in app.py
-        pass
+        workoutList = json.loads(row[0])
     if workoutList is None:
         workoutList = []
     
