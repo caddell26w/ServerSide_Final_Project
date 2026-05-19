@@ -21,6 +21,7 @@ export default function HomeScreen() {
     const [oldPasswordInput, setOldPasswordInput] = useState('')
     const [newPasswordInput, setNewPasswordInput] = useState('')
     const [goalChange, changeGoal] = useState(false) // prompt useEffect to load the goals
+    const [pfpChange,changePfp] = useState(false) // prompt useEffect to load pfp
 
     const [URI, setURI] = useState<string | null>(null) // URI
     const [error, setError] = useState<string | null>(null) // Error Msg
@@ -175,7 +176,7 @@ export default function HomeScreen() {
             method: "POST",
             body: formData,
             credentials: 'include'
-        })
+        }).then((response) => response.json()).then((json) => {pfpChange ? changePfp(false) : changePfp(true);})
     }
 
     useEffect(() => {
@@ -187,7 +188,7 @@ export default function HomeScreen() {
             navigation.getParent()?.navigate('index')
         })
         
-    }, [goalChange])
+    }, [goalChange, pfpChange])
 
     return (
         <View
