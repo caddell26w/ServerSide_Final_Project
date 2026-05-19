@@ -5,7 +5,7 @@ const url = 'https://localhost:8429';
 
 export default function Activity() {
 
-  type activity = {
+  type Activity = {
     workoutName: string;
     workoutDate: string;
   }
@@ -37,9 +37,9 @@ export default function Activity() {
 
   return (
     <View style={styles.container}>
-      {activity.map((item: activity) => (
-        <Text style={styles.exerciseDetails}>
-          {String(item)}
+      {activity.map((item: Activity) => (
+        <Text style={styles.exerciseDetails} key={item.workoutName + item.workoutDate}>
+          {item.workoutName} - {item.workoutDate}
         </Text>
       ))}
     </View>
@@ -62,7 +62,9 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         marginBottom: 8,
         padding: 8,
-        textAlignVertical: 'top'
+        textAlignVertical: 'top',
+        marginHorizontal: 20,
+        textAlign: 'center'
     }
 
 });

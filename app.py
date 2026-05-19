@@ -267,13 +267,29 @@ def workoutLog():
     dayWorkout = request.get_json()['data']['workout']
     current = datetime.now()
     current = current.strftime("%m/%d/%Y %H:%M") 
-    workoutString = dayWorkout + " - " + current
+    workoutString = dayWorkout + " || " + current
     database.updateWorkoutLog(user_id,workoutString)
 
     return (jsonify({'status': 'SUCCESS', 'body':'success'}))
 
     # Get the current time
+
+@app.route("/activity", methods=['GET'])
+def getWorkouts():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
     
+    log = database.getWorkoutLog(user_id)
+    print(log)
+    activity = []
+    for i in log:
+        print(i)
+        iSplit = str(i).split(" || ")
+        print(iSplit)
+        activity.append({'workoutName':f'{iSplit[0].strip()}','workoutDate':f'{iSplit[1].strip()}'})
+    return (jsonify({'status': 'SUCCESS', 'body': activity}))
 
 @app.route("/changePassword", methods=['POST'])
 def changePassword():

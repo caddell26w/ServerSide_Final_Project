@@ -259,6 +259,22 @@ def updateWorkoutLog(userid: int, workout: str) -> list:
     __db.commit()
     return workoutList
 
+def getWorkoutLog(userid: int) -> list:
+    workoutList = []
+    workoutQuery = '''SELECT workoutList from workoutLog where userid = ?'''
+    __db = sqlite3.connect('fitness-app.db')
+    cursor = __db.cursor()
+
+    for row in cursor.execute(workoutQuery, (userid,)):
+        workout = row[0]
+        workout[0] = ""
+        workout[-1] = ""
+        workoutList.append(row[0])
+    if workoutList is None:
+        workoutList = []
+    
+    return workoutList
+
 def get_goals(userid: int) -> str:
     getGoal = '''SELECT goals from accountInfo where userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
