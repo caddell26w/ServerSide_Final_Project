@@ -2,7 +2,7 @@ import { Platform, StyleSheet, View, Text, Image, Pressable, ScrollView, Alert, 
 import React, { useState, useEffect } from 'react';
 import { useWindowDimensions, TextInput } from 'react-native';
 import { useNavigation } from 'expo-router';
-import * as ImagePicker from "expo-image-picker";
+import * as imageExpo from "expo-image-picker";
 
 export default function HomeScreen() {
     const {width, height} = useWindowDimensions();
@@ -22,8 +22,8 @@ export default function HomeScreen() {
     const [newPasswordInput, setNewPasswordInput] = useState('')
     const [goalChange, changeGoal] = useState(false) // prompt useEffect to load the goals
 
-    const [files, setFiles] = useState(null) // URI
-    const [error, setError] = useState(null) // Error Msg
+    const [URI, setURI] = useState<string | null>(null) // URI
+    const [error, setError] = useState<string | null>(null) // Error Msg
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -137,6 +137,47 @@ export default function HomeScreen() {
         });
     }
 
+    // User upload system
+    const getImage = async () => {
+        const {status} = await imageExpo.requestMediaLibraryPermissionsAsync()
+
+        if (status !== "granted") {
+
+            Alert.alert(
+                "Permission denied",
+                "We need permission for seeing images"
+            )
+        } else { 
+
+            const result = await imageExpo.launchImageLibraryAsync();
+
+            if (!result.canceled) {
+                setURI(result.assets?.[0]?.uri)
+
+                setError(null)
+            }
+        }
+    }
+
+    const uploadImage = async () => {
+        if (URI == null) {return;}
+
+        const formData = new FormData()
+
+        // append is using a diff config than what we want so we use as any to ignore typescript
+        const res = await fetch(URI);   // get the bytes from the blob url
+        const blob = await res.blob();  // real file data
+
+        formData.append("file", blob, `${Date.now()}.jpg`);
+
+        let url = "http://localhost:8429/sendImage"
+        await fetch(url, {
+            method: "POST",
+            body: formData,
+            credentials: 'include'
+        })
+    }
+
     useEffect(() => {
         fetch('http://localhost:8429/accountSettings', {credentials: 'include'})
         .then((response) => response.json())
@@ -223,10 +264,21 @@ export default function HomeScreen() {
                 </View>
             </View>
             <Pressable
-            onPress = {() => togglePfpActive(2)}>
+            onPress = {() => {
+            togglePfpActive(2)
+            getImage()}}>
                 <Text
                 style={[{margin: 8}, styles.changeButtons, {display: ((passwordActive > 1 || goalActive > 1 || pfpActive > 1)) ? 'none': 'flex'}]}>
                     Change profile picture
+                </Text>
+            </Pressable>
+            <Pressable
+            onPress = {() => {
+            togglePfpActive(1) 
+            uploadImage() }}>
+                <Text
+                style={[{margin: 8}, styles.changeButtons, {display: ((pfpActive <= 1)) ? 'none': 'flex'}]}>
+                    Submit profile picture
                 </Text>
             </Pressable>
             <Pressable
@@ -273,7 +325,7 @@ export default function HomeScreen() {
                 </Text>
             </Pressable>
             <TextInput 
-                style={[styles.inputText,{display: goalActive > 1 || pfpActive > 1? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
+                style={[styles.inputText,{display: goalActive > 1 ? 'flex' : 'none'}, {color: '#D2B80F'}, {paddingVertical: 2}]}
                 placeholder='Enter a fitness goal'
                 placeholderTextColor={'#D2B80F'}
                 value={goalInput}
@@ -281,7 +333,7 @@ export default function HomeScreen() {
                 >
             </TextInput>
             <Pressable
-                style={[{display: goalActive > 1 || pfpActive > 1? 'flex' : 'none'}]}
+                style={[{display: goalActive > 1 ? 'flex' : 'none'}]}
                 onPress={() => {
                     setGoal(goalInput, String(goalActive)) 
                     toggleGoalActive(1)

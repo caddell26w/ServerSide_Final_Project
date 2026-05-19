@@ -5,6 +5,8 @@ import database
 import redis
 import uuid
 import json
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
@@ -257,6 +259,20 @@ def changePassword():
     successStatus = 'SUCCESS' if updateStatus == True else 'ERROR'
 
     return (jsonify({'status':successStatus, 'body': str(updateStatus)}))
+
+@app.route("/sendImage", methods=['POST'])
+def sendImage():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    # request.form = ImmutableMultiDict([])
+    fileStorage = request.files["file"] # file storage
+    fileName = request.files["file"].filename # file name
+
+    return jsonify({'status':'SUCCESS','body':''})
+
 
 @app.route("/delete", methods=['DELETE'])
 def deleteAccount():
