@@ -133,7 +133,8 @@ def respond_friendRequest(user_id: int, requesterId: int, response: str):
             friendsList = row[0]
         if friendsList == None:
             friendsList = []
-        friendsList.append(get_username(requesterId))
+        if get_username(requesterId) not in friendsList:
+            friendsList.append(get_username(requesterId))
         __db.commit()
         __db.close()
         update_accountInfo_friendsList(f'{friendsList}', user_id)
@@ -143,7 +144,8 @@ def respond_friendRequest(user_id: int, requesterId: int, response: str):
             friendsList = row[0]
         if friendsList == None:
             friendsList = []
-        friendsList.append(get_username(user_id))
+        if get_username(user_id) not in friendsList:
+            friendsList.append(get_username(user_id))
         __db.close()
         update_accountInfo_friendsList(f'{friendsList}', requesterId)
     else:
