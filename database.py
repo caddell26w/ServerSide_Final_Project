@@ -256,10 +256,7 @@ def updateWorkoutLog(userid: int, workout: str) -> list:
     cursor = __db.cursor()
 
     for row in cursor.execute(workoutQuery, (userid,)):
-        workout = row[0]
-        workout[0] = ""
-        workout[-1] = ""
-        workoutList.append(row[0]) # Transforms it to a list, which we loop through in app.py
+        workoutList = row[0]
     if workoutList is None:
         workoutList = []
     workoutList.append(workout)
@@ -276,9 +273,9 @@ def getWorkoutLog(userid: int) -> list:
 
     for row in cursor.execute(workoutQuery, (userid,)):
         workout = row[0]
-        workout[0] = ""
-        workout[-1] = ""
-        workoutList.append(row[0]) # Transforms it to a list, which we loop through in app.py
+        workout = workout[1:-1]
+        workoutList.append(workout) # Transforms it to a list, which we loop through in app.py
+        pass
     if workoutList is None:
         workoutList = []
     
