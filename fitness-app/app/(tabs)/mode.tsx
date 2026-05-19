@@ -52,7 +52,7 @@ export default function changeWorkoutScreen() {
         }).then((resp) => {return resp.json()})
         if (response.status === 'ERROR') {
             console.error("Error:", response.body)
-            navigation.getParent()?.navigate('index')
+            navigation.getParent()?.navigate('index') // if not logged in or error in browser
         }
     }
 

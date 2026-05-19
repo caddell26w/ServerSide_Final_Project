@@ -8,10 +8,14 @@ export default function Activity() {
   type Activity = {
     workoutName: string;
     workoutDate: string;
-  }
+  } // in future works, this allows us to better make use of each variable such as ordering
 
   const [activity, setActivity] = useState([]);
 
+  /*
+
+  Retrieves the workoutLog from python
+  */
   async function getActivity(){
     try {
       const submit = await fetch(`${url}/activity`, {
@@ -23,7 +27,7 @@ export default function Activity() {
       });
       const response = await submit.json();
       if (response.status === "SUCCESS")
-        setActivity(response.body);
+        setActivity(response.body); // python list of dictionaries, which turn to arrays we map over
       else 
         Alert.alert("Failed to retrieve activity");
     } catch (error) {
@@ -64,7 +68,8 @@ const styles = StyleSheet.create({
         padding: 8,
         textAlignVertical: 'top',
         marginHorizontal: 20,
-        textAlign: 'center'
+        textAlign: 'center',
+        alignContent:'center'
     }
 
 });
