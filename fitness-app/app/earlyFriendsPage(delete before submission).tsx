@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, Platform, View, StatusBar, TouchableHighlight, Alert, TextInput } from 'react-native';
 
-const url = 'http://192.168.0.108:8429';
+const url = 'https://localhost:8429';
 
 export default function Friends() {
 
@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    backgroundColor: '#0b2f42',
+    paddingTop: Platform.OS === "web" ? 0: StatusBar.currentHeight,
   },
 
 });

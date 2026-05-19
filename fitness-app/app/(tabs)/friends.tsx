@@ -1,10 +1,11 @@
-import { Platform, StyleSheet, View, ScrollView, Text, Image, Pressable} from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { Platform, StyleSheet, View, ScrollView, Text, Image, Pressable, Alert} from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigation } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
-export default function HomeScreen() {
+export default function FriendsScreen() {
     const {width, height} = useWindowDimensions();
     
     const navigation = useNavigation();
@@ -17,6 +18,11 @@ export default function HomeScreen() {
     const [activeFriendsList, setActiveFriendsList] = useState([''])
     const [usersList, setUsersList] = useState([''])
 
+    const [friendRequests, setFriendRequests] = useState([])
+    const [friendRequestSenders, setFriendRequestSenders] = useState([''])
+
+    const requestRef = useRef(null)
+    const usersRef = useRef(null)
 
     const boxSizing = {
         width: Platform.OS === 'web'? 0.400 * width: 0.35 * width,
@@ -24,6 +30,11 @@ export default function HomeScreen() {
     }
     const titleSizing = {
         width: Platform.OS === 'web' ? 0.400 * width : 0.35 * width
+    }
+
+    type FriendRequest = {
+        requesterId: number
+        requesterUsername: string
     }
 
     function setDataValues(userValue:string, profilePictureValue:string, friendsListValue:string[]) {
@@ -38,35 +49,161 @@ export default function HomeScreen() {
     }
 
     function updateActiveUsers(activeFriends: Array<string>, users: Array<string>) {
+        if (activeFriends == undefined) {
+            activeFriends = ['']
+        }
+        else if (activeFriends.length == 0) {
+            activeFriends = ['']
+        }
         setActiveFriendsList(activeFriends)
-        for (let index in users) {
-            let currentIndex = Number(index)
-            if (users[currentIndex] == user) {
-                users.splice(currentIndex, 1)
-            }
+        let activeUsers = users.filter(account => account !== user)
+        activeUsers = activeUsers.filter(account => !(friendRequestSenders.includes(account)))
+
+        if (activeUsers == undefined) {
+            activeUsers = ['']
         }
-        if (users.length == 0) {
-            users = ['']
+        else if (activeUsers.length == 0) {
+            activeUsers = ['']
         }
-        setUsersList(users)
+        setUsersList(activeUsers)
         let inactiveFriends = []
         for (let friend of friendsList) {
             if (!(activeFriends.includes(friend))) {
                 inactiveFriends.push(friend)
             }
         }
+        if (inactiveFriends.length == 0) {
+            inactiveFriends = ['']
+        }
         setInactiveFriendsList(inactiveFriends)
-    }
-    
-    function sendFriendRequest(user: string) {
-        console.log(user)
     }
 
     useEffect(() => {
-        fetch('https://localhost:8429/activeFriends', {credentials: 'include'})
-        .then((response) => response.json())
-        .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): updateActiveUsers(json.body.activeFriendsList, json.body.usersList)}})
-    }, [friendsList])
+        function getUsersAndFriends() {
+            setTimeout(function run() {
+                fetch('https://localhost:8429/activeFriends', {credentials: 'include'})
+                .then((response) => response.json())
+                .then((json) => {{json.status === 'ERROR'? (() => {throw (json.body)})(): updateActiveUsers(json.body.activeFriendsList, json.body.usersList)}})
+                .catch((error) => {
+                    console.error('Error:', error)
+                    navigation.getParent()?.navigate('index')
+                })
+                usersRef.current = setTimeout(run, 2000)
+            }, 5000)
+        }
+        getUsersAndFriends()
+        return () => {
+            clearTimeout(usersRef.current)
+        }
+    }, [])
+    
+    async function sendFriendRequest(user: string) {
+        try {
+            const submit = await fetch(`https://localhost:8429/request`, {
+                method: 'POST',
+                headers: {"Content-Type": "application/json"},
+                credentials: 'include',
+                body: JSON.stringify({
+                "action": "SEND_REQUEST",
+                "friendUsername": user,
+                }),
+            });
+            const response = await submit.json();
+            let requests = []
+            if (response.status === "SUCCESS") {
+                Alert.alert("Friend request sent");
+            }
+            else {
+                Alert.alert("Failed to send friend request");
+            }
+            }
+            catch {
+                Alert.alert("Error", "Failed to connect to server \n");
+            }
+    }
+
+    async function acceptFriendRequest(requesterId:number){
+          try {
+            const submit = await fetch(`https://localhost:8429/respondRequest`, {
+              method: 'POST',
+              headers: {"Content-Type": "application/json"},
+              credentials: 'include',
+              body: JSON.stringify({
+                "action": "ACCEPT_REQUEST",
+                "response": "ACCEPT",
+                "requesterId": requesterId,
+              })
+            });
+            const response = await submit.json();
+            if (response.status === "SUCCESS")
+              Alert.alert("Friend request accepted");
+            else         
+              Alert.alert("Request failed to accept");
+          }
+          catch {
+              Alert.alert("Error", "Failed to connect to server \n");
+          }
+      }
+    
+    async function declineFriendRequest(requesterId:number){
+        try {
+        const submit = await fetch(`https://localhost:8429/respondRequest`, {
+            method: 'POST',
+            headers: {"Content-Type": "application/json"},
+            credentials: 'include',
+            body: JSON.stringify({
+            "action": "DECLINE_REQUEST",
+            "response": "DECLINE",
+            "requesterId": requesterId,
+            })
+        });
+        const response = await submit.json();
+        if (response.status === "SUCCESS")
+            Alert.alert("Friend request declined");
+        else         
+            Alert.alert("Request failed to decline");
+        }
+        catch{
+            Alert.alert("Error", "Failed to connect to server \n");
+        }
+    }
+
+    async function getFriendRequests(){
+        try {
+            const submit = await fetch(`https://localhost:8429/request`, {
+            method: 'GET',
+            headers: {"Content-Type": "application/json"},
+            credentials: 'include',
+            });
+            const response = await submit.json();
+            if (response.status === "SUCCESS") {
+            setFriendRequests(response.body.friendRequests);
+            } else {
+            Alert.alert("Failed to retrieve friend requests");
+            }
+        }
+        catch {
+            Alert.alert("Error", "Failed to connect to server \n");
+        }
+    }
+
+    useEffect(() => {
+        function getRequests() {
+            setTimeout (function run() {
+                getFriendRequests()
+                let requesters = []
+                for (let request of friendRequests) {
+                    requesters.push(request.requesterUsername)
+                }
+                setFriendRequestSenders(requesters)
+                requestRef.current = setTimeout(run, 2000)
+            }, 5000)
+        }
+        getRequests()
+        return () => {
+            clearTimeout(requestRef.current)
+        }
+      }, [])
 
     useEffect(() => {
             fetch('https://localhost:8429/accountSettings', {credentials: 'include'})
@@ -76,7 +213,6 @@ export default function HomeScreen() {
                 console.error('Error:', error)
                 navigation.getParent()?.navigate('index')
             })
-            
     }, [])
 
     return (
@@ -119,7 +255,7 @@ export default function HomeScreen() {
                 style={{
                     flexDirection: 'row',
                     alignItems: 'center'
-                }}>
+                    }}>
                     <View>
                         <Text style={[titleSizing, styles.dayTitle, {margin: 8, marginBottom: 0, fontWeight: '500'}]}>
                         Friend Activity
@@ -222,6 +358,7 @@ export default function HomeScreen() {
                                     style={{
                                         flexDirection: 'column',
                                         width: '100%',
+                                        height: '50%',
                                     }}>
                                     {usersList.map((user, index) => (
                                         <View 
@@ -247,11 +384,60 @@ export default function HomeScreen() {
                                         }}>
                                             <Pressable
                                                 onPress={() => sendFriendRequest(user)}>
-                                                <IconSymbol size={20} name="person.badge.plus" color={'black'} />
+                                                <IconSymbol size={20} name="person.badge.plus" color={'#D2B80F'} />
                                             </Pressable>
                                         </Text>
                                         </View>
                                     ))}
+                                    </View>
+                                    <View>
+                                        <Text
+                                        style={{
+                                            fontSize: Platform.OS === 'web'? 18 : 9,
+                                            marginTop: 8,
+                                            borderColor: '#0f4e70',
+                                            borderTopWidth: 2,
+                                            borderBottomWidth: 2,
+                                            padding: 8,
+                                            fontWeight: '500'
+                                        }}>
+                                            Active Requests
+                                        </Text>
+                                        <View>
+                                            {friendRequests.map((request: FriendRequest, index) => (
+                                            <View 
+                                            style={{
+                                                borderBottomWidth: 1.5,
+                                                borderColor: '#0f4e70',
+                                                borderStyle: 'dashed',
+                                                padding: 3,
+                                                width: '100%',
+                                                flexDirection: 'row'
+                                            }}>
+                                            <Text 
+                                            key={index}
+                                            style={{
+                                                fontSize: Platform.OS === 'web'? 14 : 7,
+                                                textAlign: 'left', 
+                                                width: '100%'
+                                            }}>
+                                            {request.requesterUsername == ''? 'No Active Requests' : request.requesterUsername}</Text>
+                                            <Text
+                                            style={{
+                                                display: request.requesterUsername == ''? 'none' : 'flex'
+                                            }}>
+                                                <Pressable
+                                                    onPress={() => acceptFriendRequest(request.requesterId)}>
+                                                    <IconSymbol size={20} name="checkmark.square.fill" color={'#D2B80F'} />
+                                                </Pressable>
+                                                <Pressable
+                                                    onPress={() => declineFriendRequest(request.requesterId)}>
+                                                    <IconSymbol size={20} name="square.slash" color={'#D2B80F'} />
+                                                </Pressable>
+                                            </Text>
+                                            </View>
+                                            ))}
+                                        </View>
                                     </View>
                                 </View>
                             </Text>

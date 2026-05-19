@@ -8,7 +8,7 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=['https://localhost:8081', 'https://localhost', 'https://localhost:443', 'https://localhost:8429'])
 database.database_init()
 
 R_Server = redis.StrictRedis()
@@ -58,7 +58,7 @@ def register():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
+        res.set_cookie('session_id', session_id,  samesite='None', secure=True)
         return(res)
     return jsonify({'status' : 'SUCCESS', 'body': ''})
 
@@ -84,7 +84,7 @@ def login():
         )
 
         res = make_response(jsonify({'message': 'Success'}))
-        res.set_cookie('session_id', session_id, samesite='Lax', secure=False)
+        res.set_cookie('session_id', session_id,  samesite='None', secure=True)
         return(res)
 
 @app.route("/changeWorkout", methods=['POST'])
@@ -142,11 +142,12 @@ def activeFriends():
         return user_id
     
     friendsList = database.get_friendsList(user_id)
-    friendsList = ['admin']
-    if friendsList == None:
-        return (jsonify({'status': 'SUCCESS', 'body': {'activeFriendsList' : []}}))
 
     usersList = database.get_users()
+
+    if friendsList == None:
+        return (jsonify({'status': 'SUCCESS', 'body': {'activeFriendsList' : [], 'usersList' : usersList}}))
+
 
     activeFriendsList = []
     
@@ -162,9 +163,11 @@ def handleRequest():
     user_id = getUserid(token)
     if type(user_id) != int:
         return user_id
-
+    
     if request.method == 'GET':
         friendRequests = database.get_friendRequests(user_id)
+        if friendRequests == []:
+            friendRequests = [{"requesterUsername" : "", "requesterId" : ""}]
         return jsonify({'status' : 'SUCCESS', 'body': {'friendRequests' : friendRequests}})
     elif request.method == 'POST':
         req = request.get_json()
@@ -174,8 +177,10 @@ def handleRequest():
     else: 
         return jsonify({'status' : 'ERROR', 'body': ''})
 
-@app.route("/respondRequest", methods=['POST'])
+@app.route("/respondRequest", methods=['POST', 'OPTIONS'])
 def respondRequest():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
     token = request.cookies.get('session_id')
     user_id = getUserid(token)
     if type(user_id) != int:

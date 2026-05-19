@@ -1,5 +1,5 @@
 import { Platform, StyleSheet, View, Text, TextInput, Button, Pressable} from 'react-native';
-import { cloneElement, useState} from 'react';
+import React, { cloneElement, useState} from 'react';
 import { useNavigation } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 
