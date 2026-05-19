@@ -248,7 +248,7 @@ def add_general_file(userid: int, fileExtension:str):
                             SET profilePicture = ?
                             WHERE userid = ?'''
     username = get_username(userid)
-    filePath = f'{username}_avatar.{fileExtension}'
+    filePath = f'{fileExtension}'
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(update_accountInfo, (filePath, userid))
     __db.commit()

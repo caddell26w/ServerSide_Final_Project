@@ -267,11 +267,23 @@ def sendImage():
     if type(user_id) != int:
         return user_id
     
-    # request.form = ImmutableMultiDict([])
-    fileStorage = request.files["file"] # file storage
-    fileName = request.files["file"].filename # file name
+    # to ensure the user actually sent a file
+    if "file" not in request.files:
+        return jsonify({'status': 'ERROR', 'body': 'No file part'})
 
-    return jsonify({'status':'SUCCESS','body':''})
+    fileStorage = request.files["file"] # the storage
+    folderUpload = os.path.join(os.path.dirname(__file__), "static/users") # path to the folder
+
+    if fileStorage.filename == "": # ensures the user didnt just send a empty file
+        return jsonify({'status': 'ERROR', 'body': 'No selected file'})
+    os.makedirs(folderUpload, exist_ok=True) # creates a directory if it doesn't exist. For our case, it should exist
+    file = secure_filename(fileStorage.filename) 
+    final = f"{uuid.uuid4()}_{file}" # make file unique and secure
+    save_path = os.path.join(folderUpload, final)
+    fileStorage.save(save_path) # save it to the local folder
+    database.add_general_file(user_id,final) # update sqlite3 with the filename
+
+    return jsonify({'status': 'SUCCESS', 'body': save_path})
 
 
 @app.route("/delete", methods=['DELETE'])

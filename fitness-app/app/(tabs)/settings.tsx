@@ -168,7 +168,7 @@ export default function HomeScreen() {
         const res = await fetch(URI);   // get the bytes from the blob url
         const blob = await res.blob();  // real file data
 
-        formData.append("file", blob, `${Date.now()}.jpg`);
+        formData.append("file", blob, `${crypto.randomUUID()}.jpg`); // ensure each filename is unique
 
         let url = "http://localhost:8429/sendImage"
         await fetch(url, {
