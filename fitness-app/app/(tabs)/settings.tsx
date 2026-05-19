@@ -48,6 +48,7 @@ export default function HomeScreen() {
         friendsListValue = friendsListValue.toString().replace("[", "").replace("]", "").replace(" ", "").replace("'", "").split(",")
         let friendList = []
         for (let friend of friendsListValue) {
+            friend = friend.toString().replace("\'","")
             friendList.push(friend)
         }
         setFriendsList(friendList)

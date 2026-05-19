@@ -23,7 +23,7 @@ export default function Activity() {
       });
       const response = await submit.json();
       if (response.status === "SUCCESS")
-        setActivity(response.body.workoutsList);
+        setActivity(response.body);
       else 
         Alert.alert("Failed to retrieve activity");
     } catch (error) {
@@ -38,8 +38,8 @@ export default function Activity() {
   return (
     <View style={styles.container}>
       {activity.map((item: activity) => (
-        <Text key={item.workoutName + item.workoutDate}>
-          {item.workoutName} - {item.workoutDate}
+        <Text style={styles.exerciseDetails}>
+          {String(item)}
         </Text>
       ))}
     </View>
@@ -52,5 +52,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#0b2f42',
     paddingTop: Platform.OS === "web" ? 0 : StatusBar.currentHeight,
   },
+    exerciseDetails: {
+        fontSize: Platform.OS === 'web'? 14 : 7,
+        color: '#D2B80F',
+        borderColor: '#0f4e70',
+        borderBottomRightRadius: 8,
+        borderBottomLeftRadius: 8,
+        borderWidth: 3,
+        borderStyle: 'solid',
+        marginBottom: 8,
+        padding: 8,
+        textAlignVertical: 'top'
+    }
 
 });

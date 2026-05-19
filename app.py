@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
-from datetime import date
+from datetime import date, datetime
 import database
 import redis
 import uuid
@@ -256,6 +256,24 @@ def addGoal():
             database.update_accountInfo_goals(json.dumps(editGoalList), user_id)
     print(f"EDIT GOAL:{editGoalList}")
     return (jsonify({'status': 'SUCCESS', 'body':editGoalList}))
+
+@app.route("/logWorkout", methods=['POST'])
+def workoutLog():
+    token = request.cookies.get('session_id')
+    user_id = getUserid(token)
+    if type(user_id) != int:
+        return user_id
+    
+    dayWorkout = request.get_json()['data']['workout']
+    current = datetime.now()
+    current = current.strftime("%m/%d/%Y %H:%M") 
+    workoutString = dayWorkout + " - " + current
+    database.updateWorkoutLog(user_id,workoutString)
+
+    return (jsonify({'status': 'SUCCESS', 'body':'success'}))
+
+    # Get the current time
+    
 
 @app.route("/changePassword", methods=['POST'])
 def changePassword():

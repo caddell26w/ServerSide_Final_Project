@@ -24,10 +24,14 @@ def database_init():
                         (userid INT NOT NULL,
                         requesterid INT NOT NULL,
                         status TEXT NOT NULL)'''
+    table_workoutLog = '''CREATE TABLE IF NOT EXISTS workoutLog
+                        (userid INT NOT NULL,
+                        workoutList TEXT)'''
     __db.execute(table_accounts)
     __db.execute(table_accountInfo)
     __db.execute(table_workoutPlan)
     __db.execute(table_friendRequests)
+    __db.execute(table_workoutLog)
     __db.commit()
 
 def user_register( username: str, password: str):
@@ -57,8 +61,12 @@ def user_register( username: str, password: str):
     create_workoutPlan = '''INSERT INTO workoutPlan
                             (userid) VALUES
                             (?)'''
+    create_workoutLog = '''INSERT INTO workoutLog
+                            (userid) VALUES
+                            (?)'''
     __db.execute(create_accountInfo, (userid,))
     __db.execute(create_workoutPlan, (userid,))
+    __db.execute(create_workoutLog,(userid,))
     __db.commit()
 
 def username_check(username: str) -> bool:
@@ -235,6 +243,22 @@ def update_workoutPlan(sundayWorkout: str, mondayWorkout: str, tuesdayWorkout: s
     __db.execute(update_workoutPlan, (sundayWorkout, mondayWorkout, tuesdayWorkout, wednesdayWorkout, thursdayWorkout, fridayWorkout, saturdayWorkout, userid))
     __db.commit()
 
+def updateWorkoutLog(userid: int, workout: str) -> list:
+    workoutList = []
+    workoutQuery = '''SELECT workoutList from workoutLog where userid = ?'''
+    __db = sqlite3.connect('fitness-app.db')
+    cursor = __db.cursor()
+
+    for row in cursor.execute(workoutQuery, (userid,)):
+        workoutList = row[0]
+    if workoutList is None:
+        workoutList = []
+    workoutList.append(workout)
+    workoutUpdate = '''UPDATE workoutLog set workoutList = ? WHERE userid = ?'''
+    __db.execute(workoutUpdate, (f'{workoutList}',userid))
+    __db.commit()
+    return workoutList
+
 def get_goals(userid: int) -> str:
     getGoal = '''SELECT goals from accountInfo where userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
@@ -295,22 +319,19 @@ def delete_user(userid: int):
                             WHERE userid = ?'''
     delete_workoutPlan = '''DELETE FROM workoutPlan
                             WHERE userid = ?'''
-    delete_userFriends = '''DELETE FROM friends
-                            WHERE userid = ?'''
-    delete_Friends = '''DELETE FROM friends
-                            WHERE friendid = ?'''
     delete_userRequest = '''DELETE FROM friendRequests
                             WHERE userid = ?'''
     delete_friendRequest = '''DELETE FROM friendRequests
                             WHERE requesterid = ?'''
+    delete_workoutLog = '''DELETE FROM workoutLog
+                            where userid = ?'''
     __db = sqlite3.connect("fitness-app.db")
     __db.execute(delete_account, (userid,))
     __db.execute(delete_accountInfo, (userid,))
     __db.execute(delete_workoutPlan, (userid,))
-    __db.execute(delete_userFriends, (userid,))
-    __db.execute(delete_Friends, (userid,))
     __db.execute(delete_userRequest, (userid,))
     __db.execute(delete_friendRequest, (userid,))
+    __db.execute(delete_workoutLog, (userid,))
     __db.commit()
 
 if __name__ == '__main__':
